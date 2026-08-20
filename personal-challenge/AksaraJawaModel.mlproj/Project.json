@@ -1,0 +1,29 @@
+{
+  "activityEntities" : [
+    "projectCreated",
+    [
+      {
+        "createdDate" : "2026-08-20T04:33:48Z",
+        "event" : "projectCreated",
+        "id" : "A045E774-59EC-496E-827E-23DECAD190B9",
+        "subtitle" : "AksaraJawaModel",
+        "title" : "Project Created"
+      }
+    ]
+  ],
+  "authorName" : "Raka Febrian Syahputra",
+  "createdDate" : "2026-08-20T04:33:48Z",
+  "description" : "",
+  "id" : "C66CEBFA-7D6C-46F4-902D-A41CD33F54F0",
+  "license" : "",
+  "location" : "",
+  "modifiedDate" : "2026-08-20T04:33:48Z",
+  "projectName" : "AksaraJawaModel",
+  "settingsEntity" : {
+    "snapshotOnExtendTraining" : true,
+    "snapshotOnResumeTraining" : false
+  },
+  "taskType" : "imageClassifier",
+  "title" : "Image Classification",
+  "version" : "1.1"
+}
