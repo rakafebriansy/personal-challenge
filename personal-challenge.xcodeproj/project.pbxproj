@@ -29,9 +29,22 @@
 		960CBAE530368FC900FA4955 /* personal-challengeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "personal-challengeUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		39C8BBE4303E7F28006A1D98 /* Exceptions for "personal-challenge" folder in "personal-challenge" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 960CBACB30368FC900FA4955 /* personal-challenge */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		960CBACE30368FC900FA4955 /* personal-challenge */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				39C8BBE4303E7F28006A1D98 /* Exceptions for "personal-challenge" folder in "personal-challenge" target */,
+			);
 			path = "personal-challenge";
 			sourceTree = "<group>";
 		};
@@ -400,6 +413,8 @@
 				DEVELOPMENT_TEAM = URFUZSHWW9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "personal-challenge/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk menerjemahkan tulisan tangan Hijaiyah secara langsung.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -432,6 +447,8 @@
 				DEVELOPMENT_TEAM = URFUZSHWW9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "personal-challenge/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk menerjemahkan tulisan tangan Hijaiyah secara langsung.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

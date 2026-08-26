@@ -11,6 +11,7 @@ import SwiftUI
 @Observable
 class ScannerViewModel {
     var selectedImage: UIImage? = nil
+    var debugProcessedImage: UIImage? = nil
     var translationResult: String = "No result yet."
     var isProcessing: Bool = false
     
@@ -21,17 +22,11 @@ class ScannerViewModel {
         self.isProcessing = true
         self.translationResult = "Analyzing..."
         
-        guard let cgImage = image.cgImage else {
-            self.translationResult = "Failed to read image format."
-            self.isProcessing = false
-            return
-        }
-        
-        mlService.classifyImage(image: cgImage) {
-            [weak self] result in
-            Task {
-                @MainActor in
+        // Pass UIImage directly — orientation is handled inside MLVisionService via CIImage(image:)
+        mlService.classifyImage(image: image) { [weak self] result, debugImage in
+            Task { @MainActor in
                 self?.translationResult = result
+                self?.debugProcessedImage = debugImage
                 self?.isProcessing = false
             }
         }
