@@ -11,6 +11,12 @@ import Vision
 import CoreImage
 import SwiftUI
 
+struct Prediction: Identifiable, Hashable {
+    let id = UUID()
+    let letter: String
+    let confidence: Int
+}
+
 // Map UIImage.Orientation to CGImagePropertyOrientation
 // so CIImage.oriented() can correctly bake the rotation into pixels
 private extension UIImage.Orientation {
@@ -56,15 +62,15 @@ class MLVisionService {
         }
     }
     
-    func classifyImage(image: UIImage, completion: @escaping (String, UIImage?) -> Void) {
+    func classifyImage(image: UIImage, completion: @escaping ([Prediction], String?, UIImage?) -> Void) {
         guard let model = visionModel else {
-            completion("Error: model is not ready yet.", nil)
+            completion([], "Error: model is not ready yet.", nil)
             return
         }
         
         // Step 1: Get raw CGImage (no orientation metadata)
         guard let cgImage = image.cgImage else {
-            completion("Failed to read CGImage.", nil)
+            completion([], "Failed to read CGImage.", nil)
             return
         }
         
@@ -78,7 +84,7 @@ class MLVisionService {
         
         // 3a. Convert to Grayscale and increase Contrast
         guard let grayscaleFilter = CIFilter(name: "CIColorControls") else {
-            completion("Failed to create grayscale filter.", nil)
+            completion([], "Failed to create grayscale filter.", nil)
             return
         }
         grayscaleFilter.setValue(ciImage, forKey: kCIInputImageKey)
@@ -87,14 +93,14 @@ class MLVisionService {
         
         // 3b. Invert colors: white paper → black bg, black ink → white text
         guard let invertFilter = CIFilter(name: "CIColorInvert") else {
-            completion("Failed to create invert filter.", nil)
+            completion([], "Failed to create invert filter.", nil)
             return
         }
         invertFilter.setValue(grayscaleFilter.outputImage, forKey: kCIInputImageKey)
         
         guard let outputCIImage = invertFilter.outputImage,
               let processedCGImage = CIContext().createCGImage(outputCIImage, from: outputCIImage.extent) else {
-            completion("Failed to create final processed image.", nil)
+            completion([], "Failed to create final processed image.", nil)
             return
         }
         
@@ -104,26 +110,31 @@ class MLVisionService {
         // Step 4: Run Vision request on the processed image
         let request = VNCoreMLRequest(model: model) { request, error in
             if let error = error {
-                completion("Error: \(error.localizedDescription)", debugImage)
+                completion([], "Error: \(error.localizedDescription)", debugImage)
                 return
             }
-            if let results = request.results as? [VNClassificationObservation],
-               let firstResult = results.first {
-                let confidence = Int(firstResult.confidence * 100)
-                let letterName = self.hijaiyahMapping[firstResult.identifier] ?? "Letter \(firstResult.identifier)"
-                completion("\(letterName) (\(confidence)%)", debugImage)
+            if let results = request.results as? [VNClassificationObservation] {
+                let top3 = results.prefix(3)
+                var predictions: [Prediction] = []
+                for result in top3 {
+                    let confidence = Int(result.confidence * 100)
+                    let letterName = self.hijaiyahMapping[result.identifier] ?? "Letter \(result.identifier)"
+                    predictions.append(Prediction(letter: letterName, confidence: confidence))
+                }
+                completion(predictions, nil, debugImage)
             } else {
-                completion("Letter is not recognized.", debugImage)
+                completion([], "Letter is not recognized.", debugImage)
             }
         }
-        request.imageCropAndScaleOption = .centerCrop
+        // Gambar sudah persegi dari renderCanvasToImage, gunakan scaleFill
+        request.imageCropAndScaleOption = .scaleFill
         
         let handler = VNImageRequestHandler(cgImage: processedCGImage, options: [:])
         Task {
             do {
                 try handler.perform([request])
             } catch {
-                completion("Failed to perform request: \(error.localizedDescription)", debugImage)
+                completion([], "Failed to perform request: \(error.localizedDescription)", debugImage)
             }
         }
     }
