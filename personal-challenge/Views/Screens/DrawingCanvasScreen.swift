@@ -56,28 +56,27 @@ struct DrawingCanvasScreen: View {
 
                 }
                 .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-                .onPreferenceChange(CanvasSizeKey.self) { _ in }
-                .overlay(alignment: .bottom) {
-                    Button(action: {
-                        if !showOriginalCanvas && viewModel.debugProcessedImage != nil {
-                            showOriginalCanvas = true
-                        } else {
-                            viewModel.checkDrawing(canvasSize: geometry.size)
-                            showOriginalCanvas = false
-                        }
-                    }) {
-                        if !showOriginalCanvas && viewModel.debugProcessedImage != nil {
-                            Label("Kembali ke Canvas", systemImage: "arrow.uturn.backward")
-                        } else {
-                            Label(viewModel.isProcessing ? "Menganalisis..." : "Periksa Tulisan", 
-                                  systemImage: viewModel.isProcessing ? "hourglass" : "sparkles.magnifyingglass")
-                        }
-                    }
-                    .primaryButtonStyle(isEnabled: !viewModel.lines.isEmpty && !viewModel.isProcessing)
-                    .disabled(viewModel.lines.isEmpty || viewModel.isProcessing)
-                    .padding(16)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 16)
+            
+            Button(action: {
+                if !showOriginalCanvas && viewModel.debugProcessedImage != nil {
+                    showOriginalCanvas = true
+                } else {
+                    viewModel.checkDrawing(canvasSize: UIScreen.main.bounds.size)
+                    showOriginalCanvas = false
+                }
+            }) {
+                if !showOriginalCanvas && viewModel.debugProcessedImage != nil {
+                    Label("Kembali ke Canvas", systemImage: "arrow.uturn.backward")
+                } else {
+                    Label(viewModel.isProcessing ? "Menganalisis..." : "Periksa Tulisan", 
+                          systemImage: viewModel.isProcessing ? "hourglass" : "sparkles.magnifyingglass")
                 }
             }
+            .primaryButtonStyle(isEnabled: !viewModel.lines.isEmpty && !viewModel.isProcessing)
+            .disabled(viewModel.lines.isEmpty || viewModel.isProcessing)
             .padding(.horizontal)
             .padding(.bottom, 16)
             
