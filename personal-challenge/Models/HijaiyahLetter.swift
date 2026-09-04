@@ -1,5 +1,5 @@
 //
-//  HijaiyahLetterAppEnum.swift
+//  HijaiyahLetter.swift
 //  personal-challenge
 //
 //  Created by Raka Febrian Syahputra on 03/09/26.
@@ -8,7 +8,7 @@
 import Foundation
 import AppIntents
 
-enum HijaiyahLetterAppEnum: String, AppEnum {
+enum HijaiyahLetter: String, CaseIterable, AppEnum {
     case alif = "alif"
     case ba = "ba"
     case ta = "ta"
@@ -38,9 +38,15 @@ enum HijaiyahLetterAppEnum: String, AppEnum {
     case waw = "waw"
     case ya = "ya"
     
-    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Huruf Hijaiyah"
+    static var typeDisplayRepresentation: TypeDisplayRepresentation = "Hijaiyah Letter"
     
-    static var caseDisplayRepresentations: [HijaiyahLetterAppEnum : DisplayRepresentation] = [
+    static var allLetters: [(letter: String, arabic: String)] {
+        allCases.map {
+            ($0.rawValue, $0.arabic)
+        }
+    }
+    
+    static var caseDisplayRepresentations: [HijaiyahLetter : DisplayRepresentation] = [
         .alif: DisplayRepresentation(title: "Alif (أ)"),
         .ba: DisplayRepresentation(title: "Ba (ب)"),
         .ta: DisplayRepresentation(title: "Ta (ت)"),

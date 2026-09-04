@@ -40,15 +40,7 @@ final class ChallengeViewModel {
     
     let audioPlayer = AudioPlayerService()
     
-    let allLetters: [(letter: String, arabic: String)] = [
-        ("alif", "ا"), ("ba", "ب"), ("ta", "ت"), ("tsa", "ث"),
-        ("jim", "ج"), ("ha", "ح"), ("kha", "خ"), ("dal", "د"),
-        ("dzal", "ذ"), ("ra", "ر"), ("zai", "ز"), ("sin", "س"),
-        ("syin", "ش"), ("shad", "ص"), ("dhad", "ض"), ("tha", "ط"),
-        ("zha", "ظ"), ("ain", "ع"), ("ghain", "غ"), ("fa", "ف"),
-        ("qaf", "ق"), ("kaf", "ك"), ("lam", "ل"), ("mim", "م"),
-        ("nun", "ن"), ("haa", "هـ"), ("waw", "و"), ("ya", "ي")
-    ]
+    let allLetters = HijaiyahLetter.allLetters
     
     var currentQuestion: ChallengeQuestion? {
         guard currentQuestionIndex < questions.count else {

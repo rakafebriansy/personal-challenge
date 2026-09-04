@@ -12,6 +12,8 @@ struct DrawingCanvasScreen: View {
     @State private var showingClearAlert = false
     @State private var showOriginalCanvas = false
     
+    @State private var canvasSize: CGSize = .zero
+    
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -40,7 +42,8 @@ struct DrawingCanvasScreen: View {
             .padding(.vertical, 12)
             .background(AppTheme.primaryBackground)
             
-            GeometryReader { geometry in
+            GeometryReader {
+                geometry in
                 ZStack {
                     if showOriginalCanvas || viewModel.debugProcessedImage == nil {
                         DrawingCanvasView(lines: $viewModel.lines)
@@ -56,6 +59,13 @@ struct DrawingCanvasScreen: View {
 
                 }
                 .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                .onAppear {
+                    canvasSize = geometry.size
+                }
+                .onChange(of: geometry.size) {
+                    oldSize, newSize in
+                    canvasSize = newSize
+                }
             }
             .padding(.horizontal)
             .padding(.bottom, 16)
@@ -64,7 +74,7 @@ struct DrawingCanvasScreen: View {
                 if !showOriginalCanvas && viewModel.debugProcessedImage != nil {
                     showOriginalCanvas = true
                 } else {
-                    viewModel.checkDrawing(canvasSize: UIScreen.main.bounds.size)
+                    viewModel.checkDrawing(canvasSize: canvasSize)
                     showOriginalCanvas = false
                 }
             }) {

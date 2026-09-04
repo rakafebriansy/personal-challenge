@@ -1,24 +1,23 @@
 import SwiftUI
 
 struct ContentView: View {
-    // Daftar huruf untuk dipilih pengguna
-    let hijaiyahList: [(letter: String, arabic: String)] = [
-        ("alif", "ا"), ("ba", "ب"), ("ta", "ت"), ("tsa", "ث"),
-        ("jim", "ج"), ("ha", "ح"), ("kha", "خ"), ("dal", "د"),
-        ("dzal", "ذ"), ("ra", "ر"), ("zai", "ز"), ("sin", "س")
-    ]
+    @State private var router = AppRouter.shared
+    
+    let hijaiyahList = HijaiyahLetter.allLetters
 
     var body: some View {
-        TabView {
+        TabView (selection: $router.selectedTab) {
             ImageClassificationScreen()
                 .tabItem {
-                    Label("Pemindai", systemImage: "camera.viewfinder")
+                    Label("Scanner", systemImage: "camera.viewfinder")
                 }
+                .tag(AppTab.scanner)
             
             DrawingCanvasScreen()
                 .tabItem {
-                    Label("Kanvas", systemImage: "pencil.and.scribble")
+                    Label("Canvas", systemImage: "pencil.and.scribble")
                 }
+                .tag(AppTab.canvas)
             
             NavigationStack {
                 List(hijaiyahList, id: \.letter) { item in
@@ -38,13 +37,15 @@ struct ContentView: View {
                 .navigationTitle("Latihan Suara")
             }
             .tabItem {
-                Label("Suara", systemImage: "mic.fill")
+                Label("Voice", systemImage: "mic.fill")
             }
+            .tag(AppTab.voice)
             
             ChallengeScreen()
                 .tabItem {
                     Label("Challenge", systemImage: "trophy.fill")
                 }
+                .tag(AppTab.challenge)
         }
     }
 }
