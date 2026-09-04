@@ -6,7 +6,6 @@ struct ContentView: View {
         ("alif", "ا"), ("ba", "ب"), ("ta", "ت"), ("tsa", "ث"),
         ("jim", "ج"), ("ha", "ح"), ("kha", "خ"), ("dal", "د"),
         ("dzal", "ذ"), ("ra", "ر"), ("zai", "ز"), ("sin", "س")
-        // ... bisa dilengkapi hingga 28 huruf
     ]
 
     var body: some View {
@@ -21,7 +20,6 @@ struct ContentView: View {
                     Label("Kanvas", systemImage: "pencil.and.scribble")
                 }
             
-            // Tab ke-3: Menu Pilih Huruf untuk Latihan Suara
             NavigationStack {
                 List(hijaiyahList, id: \.letter) { item in
                     NavigationLink {
@@ -42,6 +40,11 @@ struct ContentView: View {
             .tabItem {
                 Label("Suara", systemImage: "mic.fill")
             }
+            
+            ChallengeScreen()
+                .tabItem {
+                    Label("Challenge", systemImage: "trophy.fill")
+                }
         }
     }
 }

@@ -14,5 +14,6 @@ struct personal_challengeApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: ChallengeHistory.self)
     }
 }

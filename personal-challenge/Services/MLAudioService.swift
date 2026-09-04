@@ -31,7 +31,7 @@ class MLAudioService: NSObject {
     private func setupRequest() {
         do {
             let config = MLModelConfiguration()
-            let model = try HijaiyahSoundClassifier_2(configuration: config).model
+            let model = try HijaiyahSoundClassifier_4(configuration: config).model
             
             let soundClassifier = try SNClassifySoundRequest(mlModel: model)
             
