@@ -45,7 +45,9 @@ struct DrawingCanvasView: View {
                     let newPoint = value.location
                     
                     if value.translation == .zero {
-                        lines.append(Line(points: [newPoint]))
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                            lines.append(Line(points: [newPoint]))
+                        }
                     } else {
                         guard let lastIndex = lines.indices.last else {
                             return

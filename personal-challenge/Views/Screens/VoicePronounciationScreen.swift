@@ -9,186 +9,279 @@ import SwiftUI
 
 struct VoicePronunciationScreen: View {
     @State private var viewModel = VoiceViewModel()
+    @State private var selectedIndex: Int = 0
+    @Environment(\.colorScheme) private var colorScheme
     
-    let targetLetter: String
-    let targetArabic: String
+    private let letters = HijaiyahLetter.allCases
     
-    var body: some View {
-        VStack(spacing: 0) {
-            // MARK: - 1. Header
-            HStack {
-                Text("Latihan Pelafalan")
-                    .font(.system(.title3, design: .rounded).weight(.bold))
-                    .foregroundStyle(AppTheme.textPrimary)
-                Spacer()
-                
-                if viewModel.voiceState != .idle {
-                    Button(action: {
-                        viewModel.reset()
-                    }) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(AppTheme.accentColor)
-                    }
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 12)
-            .background(AppTheme.primaryBackground)
-            
-            // MARK: - 2. Fitur Utama (Kartu Huruf Target & Visualizer)
-            ZStack {
-                RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
-                    .fill(AppTheme.secondaryBackground)
-                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-                
-                VStack(spacing: 16) {
-                    // Huruf Target
-                    VStack(spacing: 4) {
-                        Text(targetArabic)
-                            .font(.system(size: 72, weight: .bold))
-                            .foregroundStyle(AppTheme.textPrimary)
-                        
-                        Text(targetLetter.capitalized)
-                            .font(.system(.title3, design: .rounded).weight(.semibold))
-                            .foregroundStyle(AppTheme.textSecondary)
-                    }
-                    .padding(.top, 8)
-                    
-                    Divider()
-                        .padding(.horizontal, 32)
-                    
-                    // Visualizer / Feedback Animasi
-                    visualizerView
-                        .frame(maxHeight: .infinity)
-                }
-                .padding()
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 16)
-            
-            // MARK: - 3. Tombol Aksi
-            Button(action: {
-                viewModel.startSession(targetLetter: targetLetter)
-            }) {
-                HStack(spacing: 8) {
-                    switch viewModel.voiceState {
-                    case .idle:
-                        Label("Mulai Rekam", systemImage: "mic.fill")
-                    case .countdown:
-                        Label("Bersiaplah... (\(viewModel.countdownValue))", systemImage: "hourglass")
-                    case .recording:
-                        Label("Merekam Suara...", systemImage: "waveform")
-                    case .processing:
-                        Label("Menganalisis...", systemImage: "sparkles")
-                    case .correct, .incorrect, .error:
-                        Label("Rekam Ulang", systemImage: "arrow.clockwise")
-                    }
-                }
-            }
-            .primaryButtonStyle(
-                color: isActionDisabled ? Color(UIColor.systemGray4) : AppTheme.accentColor,
-                isEnabled: !isActionDisabled
-            )
-            .disabled(isActionDisabled)
-            .padding(.horizontal)
-            .padding(.bottom, 16)
-            
-            // MARK: - 4. Section Instruksi dan Hasil (Bagian Bawah)
-            VStack(alignment: .leading, spacing: 8) {
-                Text(isShowingResult ? "Hasil Evaluasi" : "Instruksi")
-                    .font(.system(.subheadline, design: .rounded).weight(.bold))
-                    .foregroundStyle(AppTheme.textSecondary)
-                
-                Group {
-                    switch viewModel.voiceState {
-                    case .idle:
-                        Text("Tekan tombol 'Mulai Rekam', tunggu hitung mundur 3 detik, lalu ucapkan huruf '\(targetLetter.capitalized)' dengan lantang dan jelas.")
-                            .font(.system(.body, design: .rounded))
-                            .foregroundStyle(AppTheme.textPrimary)
-                            .multilineTextAlignment(.leading)
-                        
-                    case .countdown:
-                        HStack(spacing: 8) {
-                            Image(systemName: "hourglass")
-                                .foregroundStyle(Color.orange)
-                            Text("Bersiaplah... Rekaman dimulai dalam \(viewModel.countdownValue) detik.")
-                                .font(.system(.body, design: .rounded).weight(.semibold))
-                                .foregroundStyle(AppTheme.textPrimary)
-                        }
-                        
-                    case .recording:
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(Color.red)
-                                .frame(width: 10, height: 10)
-                            Text("Mikrofon aktif. Ucapkan huruf '\(targetLetter.capitalized)' sekarang!")
-                                .font(.system(.body, design: .rounded).weight(.semibold))
-                                .foregroundStyle(Color.red)
-                        }
-                        
-                    case .processing:
-                        HStack(spacing: 12) {
-                            ProgressView()
-                            Text("Model sedang mengevaluasi makhraj suara Anda...")
-                                .font(.system(.body, design: .rounded))
-                                .foregroundStyle(AppTheme.textSecondary)
-                        }
-                        
-                    case .correct:
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .foregroundStyle(Color.green)
-                                Text("Pelafalan Tepat! (\(viewModel.confidenceText))")
-                                    .font(.system(.body, design: .rounded).weight(.semibold))
-                                    .foregroundStyle(AppTheme.textPrimary)
-                            }
-                            Text("Pengucapan Anda terdeteksi sesuai dengan huruf '\(targetLetter.capitalized)'.")
-                                .font(.system(.footnote, design: .rounded))
-                                .foregroundStyle(AppTheme.textSecondary)
-                        }
-                        
-                    case .incorrect:
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.counterclockwise.circle.fill")
-                                    .foregroundStyle(Color.orange)
-                                Text("Ayo Coba Lagi (\(viewModel.confidenceText))")
-                                    .font(.system(.body, design: .rounded).weight(.semibold))
-                                    .foregroundStyle(AppTheme.textPrimary)
-                            }
-                            Text("Terdeteksi mirip: '\(viewModel.detectedLetter.capitalized)'. Ucapkan kembali dengan lebih jelas.")
-                                .font(.system(.footnote, design: .rounded))
-                                .foregroundStyle(AppTheme.textSecondary)
-                        }
-                        
-                    case .error(let message):
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(Color.red)
-                            Text(message)
-                                .font(.system(.body, design: .rounded))
-                                .foregroundStyle(AppTheme.textPrimary)
-                        }
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
-            .padding()
-            .background(AppTheme.secondaryBackground)
-            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
-            .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: -3)
-            .padding(.horizontal)
-            .padding(.bottom, 20) // Jarak aman di atas Tab Bar
-        }
-        .background(AppTheme.primaryBackground.ignoresSafeArea())
-        .onDisappear {
-            viewModel.reset()
+    var currentLetter: HijaiyahLetter {
+        letters[selectedIndex]
+    }
+    
+    init(targetLetter: String = "alif", targetArabic: String = "ا") {
+        if let idx = HijaiyahLetter.allCases.firstIndex(where: { $0.rawValue == targetLetter }) {
+            _selectedIndex = State(initialValue: idx)
+        } else {
+            _selectedIndex = State(initialValue: 0)
         }
     }
     
-    // MARK: - Helper Computed Properties
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 8) {
+                letterNavigationCard
+                visualizerCard
+                actionButton
+                instructionsCard
+            }
+            .padding(.horizontal)
+            .padding(.top, 4)
+            .padding(.bottom, 8)
+            .background(AppTheme.primaryBackground.ignoresSafeArea())
+            .navigationTitle("Voice Practice")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ThemeMenuButton()
+                        .disabled(isActionDisabled)
+                }
+            }
+        }
+        .onChange(of: viewModel.voiceState) { _, newState in
+            let isBusy = (newState == .countdown || newState == .recording || newState == .processing)
+            AppRouter.shared.isTabBarDisabled = isBusy
+        }
+        .onAppear {
+            let isBusy = (viewModel.voiceState == .countdown || viewModel.voiceState == .recording || viewModel.voiceState == .processing)
+            AppRouter.shared.isTabBarDisabled = isBusy
+        }
+        .onDisappear {
+            viewModel.reset()
+            AppRouter.shared.isTabBarDisabled = false
+        }
+    }
+    
+    private var letterNavigationCard: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 7), spacing: 5) {
+            ForEach(Array(letters.enumerated()), id: \.offset) { index, letter in
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        selectedIndex = index
+                        viewModel.reset()
+                    }
+                }) {
+                    VStack(spacing: 1) {
+                        Text(letter.arabic)
+                            .font(.system(.body, design: .rounded).weight(.bold))
+                        Text(letter.rawValue.capitalized)
+                            .font(.system(.caption2, design: .rounded).weight(.medium))
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 40)
+                    .background(selectedIndex == index ? AppTheme.accentColor : Color(UIColor.tertiarySystemGroupedBackground))
+                    .foregroundStyle(selectedIndex == index ? .white : AppTheme.textPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .stroke(
+                                selectedIndex == index ? Color.clear : (colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.04)),
+                                lineWidth: 0.5
+                            )
+                    )
+                }
+                .disabled(isActionDisabled)
+            }
+        }
+        .opacity(isActionDisabled ? 0.6 : 1.0)
+        .allowsHitTesting(!isActionDisabled)
+        .cardStyle()
+    }
+    
+    private var visualizerCard: some View {
+        VStack(spacing: 6) {
+            HStack {
+                Button(action: {
+                    if selectedIndex > 0 {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            selectedIndex -= 1
+                            viewModel.reset()
+                        }
+                    }
+                }) {
+                    Image(systemName: "chevron.left.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(selectedIndex > 0 && !isActionDisabled ? AppTheme.accentColor : Color.gray.opacity(0.3))
+                }
+                .disabled(selectedIndex == 0 || isActionDisabled)
+                
+                Spacer()
+                
+                VStack(spacing: 0) {
+                    Text(currentLetter.arabic)
+                        .font(.system(.largeTitle, design: .rounded).weight(.bold))
+                        .foregroundStyle(AppTheme.textPrimary)
+                    
+                    Text(currentLetter.rawValue.capitalized)
+                        .font(.system(.caption, design: .rounded).weight(.semibold))
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+                
+                Spacer()
+                
+                Button(action: {
+                    if selectedIndex < letters.count - 1 {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                            selectedIndex += 1
+                            viewModel.reset()
+                        }
+                    }
+                }) {
+                    Image(systemName: "chevron.right.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(selectedIndex < letters.count - 1 && !isActionDisabled ? AppTheme.accentColor : Color.gray.opacity(0.3))
+                }
+                .disabled(selectedIndex >= letters.count - 1 || isActionDisabled)
+            }
+            .padding(.horizontal, 4)
+            
+            Divider()
+            
+            visualizerView
+                .frame(height: 70)
+        }
+        .allowsHitTesting(!isActionDisabled)
+        .cardStyle()
+    }
+    
+    private var actionButton: some View {
+        Button(action: {
+            viewModel.startSession(targetLetter: currentLetter)
+        }) {
+            HStack(spacing: 6) {
+                switch viewModel.voiceState {
+                case .idle:
+                    Label("Start Recording", systemImage: "mic.fill")
+                case .countdown:
+                    Label("Get Ready... (\(viewModel.countdownValue))", systemImage: "hourglass")
+                case .recording:
+                    Label("Recording Audio...", systemImage: "waveform")
+                case .processing:
+                    Label("Analyzing...", systemImage: "sparkles")
+                case .correct, .incorrect, .error:
+                    Label("Record Again", systemImage: "arrow.clockwise")
+                }
+            }
+            .font(.system(.footnote, design: .rounded).weight(.semibold))
+            .frame(maxWidth: .infinity)
+            .frame(height: 40)
+            .background(isActionDisabled ? (colorScheme == .dark ? Color(UIColor.systemGray5) : Color(UIColor.systemGray4)) : AppTheme.accentColor)
+            .foregroundStyle(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .disabled(isActionDisabled)
+    }
+    
+    private var instructionsCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(isShowingResult ? "Evaluation Results" : "Instructions")
+                .font(.system(.footnote, design: .rounded).weight(.bold))
+                .foregroundStyle(AppTheme.textSecondary)
+            
+            Group {
+                switch viewModel.voiceState {
+                case .idle:
+                    Text("Tap 'Start Recording', wait for the countdown, then pronounce the letter '\(currentLetter.displayName)' clearly.")
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                        .multilineTextAlignment(.leading)
+                    
+                case .countdown:
+                    HStack(spacing: 6) {
+                        Image(systemName: "hourglass")
+                            .font(.caption)
+                            .foregroundStyle(Color.orange)
+                        Text("Get ready... Recording '\(currentLetter.rawValue.capitalized)' starts in \(viewModel.countdownValue)s.")
+                            .font(.system(.caption, design: .rounded).weight(.semibold))
+                            .foregroundStyle(AppTheme.textPrimary)
+                    }
+                    
+                case .recording:
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(Color.red)
+                            .frame(width: 8, height: 8)
+                        Text("Microphone active. Pronounce '\(currentLetter.displayName)' now!")
+                            .font(.system(.caption, design: .rounded).weight(.semibold))
+                            .foregroundStyle(Color.red)
+                    }
+                    
+                case .processing:
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text("Model is evaluating your pronunciation...")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(AppTheme.textSecondary)
+                    }
+                    
+                case .correct:
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.caption)
+                                .foregroundStyle(Color.green)
+                            Text("Mumtaz! Correct Pronunciation (\(viewModel.confidenceText))")
+                                .font(.system(.caption, design: .rounded).weight(.bold))
+                                .foregroundStyle(Color.green)
+                        }
+                        Text("Maa syaa Allah, your pronunciation accurately matches \(currentLetter.displayName)!")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(AppTheme.textPrimary)
+                    }
+                    
+                case .incorrect:
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.counterclockwise.circle.fill")
+                                .font(.footnote)
+                                .foregroundStyle(Color.orange)
+                            Text("Sound Mismatch — Try Again")
+                                .font(.system(.caption, design: .rounded).weight(.bold))
+                                .foregroundStyle(Color.orange)
+                        }
+                        Text("AI detected \(viewModel.detectedDisplayName) (\(viewModel.confidenceText) confidence), but expected \(currentLetter.displayName).")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(AppTheme.textSecondary)
+                    }
+                    
+                case .error(let message):
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(Color.red)
+                        Text(message)
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(AppTheme.textPrimary)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if isShowingResult {
+                Spacer(minLength: 0)
+                HStack {
+                    Spacer()
+                    Text("AI may make mistakes")
+                        .font(.system(.caption2, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary.opacity(0.8))
+                        .lineLimit(1)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .cardStyle()
+    }
     
     private var isActionDisabled: Bool {
         viewModel.voiceState == .countdown ||
@@ -205,76 +298,127 @@ struct VoicePronunciationScreen: View {
         }
     }
     
-    // MARK: - Visualizer Component
-    
     @ViewBuilder
     private var visualizerView: some View {
         switch viewModel.voiceState {
-        case .idle, .countdown, .incorrect:
-            VStack(spacing: 12) {
+        case .idle:
+            VStack(spacing: 4) {
                 ZStack {
                     Circle()
-                        .fill(AppTheme.accentColor.opacity(0.1))
-                        .frame(width: 90, height: 90)
-                    Image(systemName: "mic.circle.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(AppTheme.accentColor)
+                        .fill(colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.05))
+                        .frame(width: 46, height: 46)
+                    
+                    Image(systemName: "mic.fill")
+                        .font(.title3)
+                        .foregroundStyle(AppTheme.textSecondary)
                 }
-                Text("Siap mendengarkan")
-                    .font(.system(.callout, design: .rounded))
+                .frame(width: 60, height: 60)
+                
+                Text("Ready to listen")
+                    .font(.system(.caption2, design: .rounded).weight(.medium))
                     .foregroundStyle(AppTheme.textSecondary)
             }
             
-        case .recording:
-            VStack(spacing: 12) {
+        case .countdown:
+            VStack(spacing: 4) {
                 ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.2))
-                        .frame(width: 100, height: 100)
+                        .fill(Color.orange.opacity(0.15))
+                        .frame(width: 46, height: 46)
+                    
+                    Text("\(viewModel.countdownValue)")
+                        .font(.system(.title3, design: .rounded).weight(.bold))
+                        .foregroundStyle(Color.orange)
+                }
+                .frame(width: 60, height: 60)
+                
+                Text("Get ready to speak...")
+                    .font(.system(.caption2, design: .rounded).weight(.medium))
+                    .foregroundStyle(Color.orange)
+            }
+            
+        case .incorrect:
+            VStack(spacing: 4) {
+                ZStack {
                     Circle()
-                        .fill(Color.red.opacity(0.4))
-                        .frame(width: 80, height: 80)
+                        .fill(Color.orange.opacity(0.15))
+                        .frame(width: 46, height: 46)
+                    
+                    Image(systemName: "arrow.clockwise")
+                        .font(.system(.title3, design: .rounded).weight(.semibold))
+                        .foregroundStyle(Color.orange)
+                }
+                .frame(width: 60, height: 60)
+                
+                Text("Try pronouncing '\(currentLetter.rawValue.capitalized)' again")
+                    .font(.system(.caption2, design: .rounded).weight(.medium))
+                    .foregroundStyle(Color.orange)
+            }
+            
+        case .recording:
+            VStack(spacing: 4) {
+                ZStack {
+                    Circle()
+                        .fill(Color.red.opacity(0.15))
+                        .frame(width: 60, height: 60)
+                    
+                    Circle()
+                        .fill(Color.red.opacity(0.25))
+                        .frame(width: 52, height: 52)
+                    
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 44, height: 44)
+                    
                     Image(systemName: "mic.fill")
-                        .font(.system(size: 36))
+                        .font(.headline)
                         .foregroundStyle(.white)
                 }
-                Text("Mendengarkan...")
-                    .font(.system(.callout, design: .rounded).weight(.semibold))
+                .frame(width: 60, height: 60)
+                
+                Text("Listening...")
+                    .font(.system(.caption2, design: .rounded).weight(.semibold))
                     .foregroundStyle(Color.red)
             }
             
         case .processing:
-            VStack(spacing: 12) {
+            VStack(spacing: 6) {
                 ProgressView()
-                    .scaleEffect(1.4)
-                Text("Menganalisis audio...")
-                    .font(.system(.callout, design: .rounded))
+                    .controlSize(.regular)
+                Text("Analyzing audio...")
+                    .font(.system(.caption2, design: .rounded))
                     .foregroundStyle(AppTheme.textSecondary)
             }
             
         case .correct:
-            VStack(spacing: 10) {
+            VStack(spacing: 4) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 70))
+                    .font(.largeTitle)
                     .foregroundStyle(Color.green)
-                Text("Mumtaz! (Luar Biasa)")
-                    .font(.system(.title3, design: .rounded).weight(.bold))
+                Text("Mumtaz! (ممتاز)")
+                    .font(.system(.footnote, design: .rounded).weight(.bold))
                     .foregroundStyle(Color.green)
             }
             
         case .error:
-            VStack(spacing: 10) {
+            VStack(spacing: 4) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 60))
+                    .font(.largeTitle)
                     .foregroundStyle(Color.red)
-                Text("Gagal Merekam")
-                    .font(.system(.headline, design: .rounded))
+                Text("Recording Failed")
+                    .font(.system(.caption, design: .rounded).weight(.semibold))
                     .foregroundStyle(AppTheme.textPrimary)
             }
         }
     }
 }
 
-#Preview {
+#Preview("Light Mode") {
     VoicePronunciationScreen(targetLetter: "ba", targetArabic: "ب")
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark Mode") {
+    VoicePronunciationScreen(targetLetter: "ba", targetArabic: "ب")
+        .preferredColorScheme(.dark)
 }

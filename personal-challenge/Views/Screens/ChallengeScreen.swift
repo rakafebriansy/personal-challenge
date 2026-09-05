@@ -12,15 +12,22 @@ struct ChallengeScreen: View {
     @State private var viewModel = ChallengeViewModel()
     @State private var isPlayingChallenge: Bool = false
     @State private var showQuitAlert: Bool = false
+    @State private var showResetHistoryAlert: Bool = false
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.colorScheme) private var colorScheme
     
     @Query(sort: \ChallengeHistory.date, order: .reverse) private var historyList: [ChallengeHistory]
     
     var body: some View {
         NavigationStack {
             setupView
-                .navigationTitle("Voice Challenge")
+                .navigationTitle("Listening Challenge")
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        ThemeMenuButton()
+                    }
+                }
                 .navigationDestination(isPresented: $isPlayingChallenge) {
                     activeGameView
                         .toolbar(.hidden, for: .tabBar)
@@ -30,114 +37,181 @@ struct ChallengeScreen: View {
     }
     
     private var setupView: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Image(systemName: "slider.horizontal.3")
-                            .foregroundStyle(AppTheme.accentColor)
-                        Text("Challenge Settings")
-                            .font(.system(.headline, design: .rounded))
+        VStack(spacing: 8) {
+            VStack(spacing: 8) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("Questions: \(viewModel.questionCount)")
+                            .font(.system(.footnote, design: .rounded).weight(.bold))
                             .foregroundStyle(AppTheme.textPrimary)
+                        Text("Select 3 to 20 questions")
+                            .font(.system(.caption2, design: .rounded))
+                            .foregroundStyle(AppTheme.textSecondary)
                     }
                     
-                    Divider()
+                    Spacer()
                     
-                    Stepper(value: $viewModel.questionCount, in: 3...20) {
-                        HStack {
-                            Text("Questions:")
-                                .font(.system(.body, design: .rounded))
-                            Spacer()
-                            Text("\(viewModel.questionCount) Questions")
-                                .font(.system(.title3, design: .rounded).weight(.bold))
-                                .foregroundStyle(AppTheme.accentColor)
-                        }
-                    }
-                    
-                    Text("💡 Min 3, Max 20 questions. Answer all correctly to get a 100 score!")
-                        .font(.system(.footnote, design: .rounded))
-                        .foregroundStyle(AppTheme.textSecondary)
+                    Stepper("", value: $viewModel.questionCount, in: 3...20)
+                        .labelsHidden()
                     
                     Button(action: {
                         viewModel.startChallenge()
                         isPlayingChallenge = true
                     }) {
-                        Label("Start Challenge", systemImage: "play.fill")
+                        Label("Start", systemImage: "play.fill")
+                            .font(.system(.caption, design: .rounded).weight(.semibold))
+                            .padding(.horizontal, 12)
+                            .frame(height: 32)
+                            .background(AppTheme.accentColor)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
-                    .primaryButtonStyle(color: AppTheme.accentColor)
-                    .padding(.top, 8)
                 }
-                .cardStyle()
-                .padding(.horizontal)
-                .padding(.top, 16)
                 
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
+                Divider()
+                
+                AIEvaluationCardView(history: historyList)
+            }
+            .cardStyle()
+            
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    HStack(spacing: 6) {
                         Image(systemName: "clock.arrow.circlepath")
+                            .font(.subheadline)
                             .foregroundStyle(AppTheme.accentColor)
                         Text("Recent History")
-                            .font(.system(.headline, design: .rounded))
+                            .font(.system(.subheadline, design: .rounded).weight(.bold))
                             .foregroundStyle(AppTheme.textPrimary)
-                        Spacer()
-                        
-                        if !historyList.isEmpty {
-                            Text("\(historyList.count) Sessions")
-                                .font(.system(.caption, design: .rounded))
-                                .foregroundStyle(AppTheme.textSecondary)
-                        }
                     }
                     
-                    Divider()
+                    Spacer()
                     
-                    if historyList.isEmpty {
-                        VStack(spacing: 8) {
-                            Image(systemName: "trophy")
-                                .font(.system(size: 36))
-                                .foregroundStyle(Color.secondary.opacity(0.5))
-                            Text("No challenge history yet.\nStart your first session!")
-                                .font(.system(.callout, design: .rounded))
-                                .foregroundStyle(AppTheme.textSecondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                    } else {
-                        VStack(spacing: 10) {
-                            ForEach(historyList) { item in
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(item.badgeTitle)
-                                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                                            .foregroundStyle(AppTheme.textPrimary)
-                                        Text(item.formattedDate)
-                                            .font(.system(.caption, design: .rounded))
-                                            .foregroundStyle(AppTheme.textSecondary)
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    VStack(alignment: .trailing, spacing: 2) {
-                                        Text("\(item.score)")
-                                            .font(.system(.title3, design: .rounded).weight(.bold))
-                                            .foregroundStyle(item.isPerfectScore ? Color.green : AppTheme.accentColor)
-                                        Text("\(item.correctAnswers)/\(item.totalQuestions) Correct")
-                                            .font(.system(.caption2, design: .rounded))
-                                            .foregroundStyle(AppTheme.textSecondary)
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                                
-                                if item.id != historyList.last?.id {
-                                    Divider()
-                                }
+                    if !historyList.isEmpty {
+                        HStack(spacing: 6) {
+                            Text("\(historyList.count) \(historyList.count == 1 ? "Session" : "Sessions")")
+                                .font(.system(.caption2, design: .rounded).weight(.semibold))
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(AppTheme.accentColor.opacity(0.12))
+                                .foregroundStyle(AppTheme.accentColor)
+                                .clipShape(Capsule())
+                            
+                            Button(action: {
+                                showResetHistoryAlert = true
+                            }) {
+                                Image(systemName: "trash")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(Color.red.opacity(0.85))
+                                    .padding(3)
                             }
                         }
                     }
                 }
-                .cardStyle()
-                .padding(.horizontal)
-                .padding(.bottom, 24)
+                
+                Divider()
+                
+                if historyList.isEmpty {
+                    VStack(spacing: 8) {
+                        Spacer()
+                        Image(systemName: "trophy")
+                            .font(.title)
+                            .foregroundStyle(Color.secondary.opacity(0.35))
+                        Text("No challenge history yet.\nStart your first session to track progress!")
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(AppTheme.textSecondary)
+                            .multilineTextAlignment(.center)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        LazyVStack(spacing: 6) {
+                            ForEach(historyList) { item in
+                                HStack(spacing: 10) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(item.isPerfectScore ? Color.green.opacity(0.15) : (item.score >= 80 ? Color.orange.opacity(0.15) : AppTheme.accentColor.opacity(0.12)))
+                                            .frame(width: 36, height: 36)
+                                        
+                                        Image(systemName: item.isPerfectScore ? "trophy.fill" : (item.score >= 80 ? "star.fill" : "headphones"))
+                                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                                            .foregroundStyle(item.isPerfectScore ? Color.green : (item.score >= 80 ? Color.orange : AppTheme.accentColor))
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.badgeTitle)
+                                            .font(.system(.caption, design: .rounded).weight(.semibold))
+                                            .foregroundStyle(AppTheme.textPrimary)
+                                            .lineLimit(1)
+                                            .truncationMode(.tail)
+                                        
+                                        HStack(spacing: 4) {
+                                            Text(item.formattedDate)
+                                                .font(.system(.caption2, design: .rounded))
+                                                .foregroundStyle(AppTheme.textSecondary)
+                                                .lineLimit(1)
+                                                .layoutPriority(1)
+                                            
+                                            if !item.missedLetters.isEmpty {
+                                                Text("•")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(Color.secondary.opacity(0.5))
+                                                Text("Missed: \(item.missedLetters.joined(separator: ", "))")
+                                                    .font(.system(.caption2, design: .rounded).weight(.medium))
+                                                    .foregroundStyle(Color.red.opacity(0.85))
+                                                    .lineLimit(1)
+                                                    .truncationMode(.tail)
+                                            }
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    
+                                    VStack(alignment: .trailing, spacing: 2) {
+                                        Text("\(item.score)")
+                                            .font(.system(.subheadline, design: .rounded).weight(.bold))
+                                            .foregroundStyle(item.isPerfectScore ? Color.green : (item.score >= 80 ? Color.orange : AppTheme.accentColor))
+                                            .lineLimit(1)
+                                        
+                                        Text("\(item.correctAnswers)/\(item.totalQuestions)")
+                                            .font(.system(.caption2, design: .rounded).weight(.medium))
+                                            .padding(.horizontal, 5)
+                                            .padding(.vertical, 1.5)
+                                            .background(Color(UIColor.systemGray5))
+                                            .foregroundStyle(AppTheme.textSecondary)
+                                            .clipShape(Capsule())
+                                            .lineLimit(1)
+                                    }
+                                    .fixedSize(horizontal: true, vertical: false)
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 7)
+                                .background(Color(UIColor.tertiarySystemGroupedBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                        .stroke(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.02), lineWidth: 1)
+                                )
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
             }
+            .cardStyle()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .padding(.horizontal)
+        .padding(.top, 4)
+        .padding(.bottom, 8)
+        .alert("Reset Challenge History?", isPresented: $showResetHistoryAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Reset All", role: .destructive) {
+                resetHistory()
+            }
+        } message: {
+            Text("All past challenge results and history will be permanently deleted.")
         }
     }
     
@@ -182,17 +256,16 @@ struct ChallengeScreen: View {
         }
     }
     
-    
     private var playingView: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text("Question \(viewModel.currentQuestionIndex + 1) of \(viewModel.questionCount)")
-                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .font(.system(.footnote, design: .rounded).weight(.bold))
+                        .foregroundStyle(AppTheme.textPrimary)
                     Spacer()
                     Text("Correct: \(viewModel.correctAnswersCount)")
-                        .font(.system(.subheadline, design: .rounded).weight(.bold))
+                        .font(.system(.footnote, design: .rounded).weight(.bold))
                         .foregroundStyle(Color.green)
                 }
                 
@@ -200,17 +273,21 @@ struct ChallengeScreen: View {
                     .tint(AppTheme.accentColor)
             }
             .padding(.horizontal)
-            .padding(.top, 8)
-            .padding(.bottom, 16)
+            .padding(.top, 6)
+            .padding(.bottom, 8)
             
             ZStack {
                 RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
                     .fill(AppTheme.secondaryBackground)
-                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                    .shadow(color: colorScheme == .dark ? Color.white.opacity(0.02) : Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
+                            .stroke(colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.03), lineWidth: 1)
+                    )
                 
-                VStack(spacing: 16) {
+                VStack(spacing: 8) {
                     Text("Listen to the Letter Sound:")
-                        .font(.system(.subheadline, design: .rounded).weight(.medium))
+                        .font(.system(.caption, design: .rounded).weight(.medium))
                         .foregroundStyle(AppTheme.textSecondary)
                     
                     Button(action: {
@@ -219,48 +296,70 @@ struct ChallengeScreen: View {
                         ZStack {
                             Circle()
                                 .fill(AppTheme.accentColor.opacity(0.12))
-                                .frame(width: 96, height: 96)
+                                .frame(width: 68, height: 68)
                             
                             Image(systemName: viewModel.audioPlayer.isPlaying ? "waveform" : "speaker.wave.3.fill")
-                                .font(.system(size: 40))
+                                .font(.title2)
                                 .foregroundStyle(AppTheme.accentColor)
                                 .symbolEffect(.bounce, value: viewModel.audioPlayer.isPlaying)
                         }
                     }
                     
                     Text("Tap button to listen again")
-                        .font(.system(.caption, design: .rounded))
+                        .font(.system(.caption2, design: .rounded))
                         .foregroundStyle(AppTheme.textSecondary)
                 }
-                .padding(.vertical, 24)
+                .padding(.vertical, 12)
             }
-            .frame(height: 200)
+            .frame(height: 136)
             .padding(.horizontal)
-            .padding(.bottom, 16)
+            .padding(.bottom, 8)
             
             if let question = viewModel.currentQuestion {
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
+                VStack(spacing: 6) {
                     ForEach(question.options) { option in
                         Button(action: {
                             viewModel.selectOption(option)
                         }) {
-                            VStack(spacing: 6) {
+                            HStack(spacing: 12) {
                                 Text(option.arabic)
-                                    .font(.system(size: 46, weight: .bold))
+                                    .font(.system(.title3, design: .rounded).weight(.bold))
+                                    .frame(width: 28, alignment: .center)
+                                
                                 Text(option.letter.capitalized)
                                     .font(.system(.footnote, design: .rounded).weight(.semibold))
+                                
+                                Spacer()
+                                
+                                if viewModel.isAnswerEvaluated {
+                                    if option.letter == question.targetLetter {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.white)
+                                    } else if option == viewModel.selectedOption {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.white)
+                                    }
+                                }
                             }
+                            .padding(.horizontal, 14)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 100)
+                            .frame(height: 38)
                             .background(buttonColor(for: option, target: question.targetLetter))
                             .foregroundStyle(buttonTextColor(for: option))
-                            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
-                            .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.04), lineWidth: 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
                         }
                         .disabled(viewModel.isAnswerEvaluated)
                     }
                 }
                 .padding(.horizontal)
+                .padding(.bottom, 8)
             }
             
             Spacer()
@@ -270,65 +369,82 @@ struct ChallengeScreen: View {
                     viewModel.nextQuestion(modelContext: modelContext)
                 }) {
                     Text(viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "See Final Results" : "Next Question")
+                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(AppTheme.accentColor)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
-                .primaryButtonStyle(color: AppTheme.accentColor)
                 .padding(.horizontal)
-                .padding(.bottom, 20)
+                .padding(.bottom, 8)
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
             } else {
                 Text("Select the matching Arabic letter above")
-                    .font(.system(.footnote, design: .rounded))
+                    .font(.system(.caption, design: .rounded))
                     .foregroundStyle(AppTheme.textSecondary)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 8)
             }
         }
     }
     
     private var finishedView: some View {
-        VStack(spacing: 24) {
+        VStack {
             Spacer()
             
-            ZStack {
-                Circle()
-                    .fill(viewModel.finalScore == 100 ? Color.green.opacity(0.12) : AppTheme.accentColor.opacity(0.12))
-                    .frame(width: 140, height: 140)
+            VStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(viewModel.finalScore == 100 ? Color.green.opacity(0.12) : AppTheme.accentColor.opacity(0.12))
+                        .frame(width: 76, height: 76)
+                    
+                    Image(systemName: viewModel.finalScore == 100 ? "trophy.fill" : "rosette")
+                        .font(.largeTitle)
+                        .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
+                }
                 
-                Image(systemName: viewModel.finalScore == 100 ? "trophy.fill" : "rosette")
-                    .font(.system(size: 64))
-                    .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
+                VStack(spacing: 4) {
+                    Text(viewModel.finalScore == 100 ? "Outstanding! Perfect 🏆" : "Challenge Completed!")
+                        .font(.system(.headline, design: .rounded).weight(.bold))
+                        .foregroundStyle(AppTheme.textPrimary)
+                    
+                    Text("Your Score:")
+                        .font(.system(.caption, design: .rounded).weight(.medium))
+                        .foregroundStyle(AppTheme.textSecondary)
+                    
+                    Text("\(viewModel.finalScore)")
+                        .font(.system(.largeTitle, design: .rounded).weight(.heavy))
+                        .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
+                    
+                    Text("Answered \(viewModel.correctAnswersCount) of \(viewModel.questionCount) questions correctly (\(viewModel.finalScore)%)")
+                        .font(.system(.caption, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary)
+                        .multilineTextAlignment(.center)
+                }
+                
+                Divider()
+                    .padding(.vertical, 2)
+                
+                Button(action: {
+                    isPlayingChallenge = false
+                    viewModel.resetToSetup()
+                }) {
+                    Label("Back to Challenge Menu", systemImage: "arrow.counterclockwise")
+                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 38)
+                        .background(AppTheme.accentColor)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
             }
-            
-            VStack(spacing: 8) {
-                Text(viewModel.finalScore == 100 ? "Outstanding! Perfect 🏆" : "Challenge Completed!")
-                    .font(.system(.title2, design: .rounded).weight(.bold))
-                    .foregroundStyle(AppTheme.textPrimary)
-                
-                Text("Your Score:")
-                    .font(.system(.headline, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
-                
-                Text("\(viewModel.finalScore)")
-                    .font(.system(size: 72, weight: .heavy, design: .rounded))
-                    .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
-                
-                Text("Successfully answered \(viewModel.correctAnswersCount) out of \(viewModel.questionCount) questions correctly.")
-                    .font(.system(.body, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-            }
-            
-            Spacer()
-            
-            Button(action: {
-                isPlayingChallenge = false
-                viewModel.resetToSetup()
-            }) {
-                Label("Back to Challenge Menu", systemImage: "arrow.counterclockwise")
-            }
-            .primaryButtonStyle(color: AppTheme.accentColor)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .padding(.horizontal, 16)
+            .cardStyle()
             .padding(.horizontal)
-            .padding(.bottom, 24)
+            
+            Spacer()
         }
     }
     
@@ -357,9 +473,25 @@ struct ChallengeScreen: View {
             return AppTheme.textSecondary
         }
     }
+    
+    private func resetHistory() {
+        withAnimation {
+            for item in historyList {
+                modelContext.delete(item)
+            }
+            try? modelContext.save()
+        }
+    }
 }
 
-#Preview {
+#Preview("Light Mode") {
     ChallengeScreen()
         .modelContainer(for: ChallengeHistory.self, inMemory: true)
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark Mode") {
+    ChallengeScreen()
+        .modelContainer(for: ChallengeHistory.self, inMemory: true)
+        .preferredColorScheme(.dark)
 }

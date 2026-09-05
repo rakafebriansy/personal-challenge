@@ -14,25 +14,12 @@ struct ImageClassificationScreen: View {
     @State private var photoItem: PhotosPickerItem? = nil
     @State private var viewModel = ScannerViewModel()
     @State private var showOriginalImage = false
+    @Environment(\.colorScheme) private var colorScheme
     
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("Deteksi Kamera")
-                    .font(.system(.title3, design: .rounded).weight(.bold))
-                    .foregroundStyle(AppTheme.textPrimary)
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 12)
-            .background(AppTheme.primaryBackground)
-            
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Gambar Masukan")
-                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                        .foregroundStyle(AppTheme.textSecondary)
-                    
+        NavigationStack {
+            VStack(spacing: 0) {
+                GeometryReader { geometry in
                     ZStack {
                         Rectangle()
                             .fill(Color(UIColor.quaternarySystemFill))
@@ -43,51 +30,51 @@ struct ImageClassificationScreen: View {
                                 .resizable()
                                 .scaledToFit()
                                 .padding(8)
-                            
-                            VStack {
-                                HStack {
-                                    Spacer()
-                                    Button(action: {
-                                        showOriginalImage.toggle()
-                                    }) {
-                                        Image(systemName: showOriginalImage ? "photo.fill" : "photo")
-                                            .font(.system(size: 18, weight: .semibold))
-                                            .foregroundStyle(.white)
-                                            .padding(10)
-                                            .background(Color.black.opacity(0.6))
-                                            .clipShape(Circle())
-                                    }
-                                    .padding(12)
-                                }
-                                Spacer()
-                            }
                         } else {
                             VStack(spacing: 12) {
                                 Image(systemName: "camera.metering.unknown")
-                                    .font(.system(size: 40))
+                                    .font(.largeTitle)
                                     .foregroundStyle(AppTheme.textSecondary)
-                                Text("Belum ada foto")
+                                Text("No photo yet")
                                     .font(.system(.callout, design: .rounded).weight(.medium))
                                     .foregroundStyle(AppTheme.textSecondary)
                             }
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 350)
-                    .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius - 4, style: .continuous))
-                    
-                    HStack(spacing: 16) {
+                    .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
+                    .shadow(color: colorScheme == .dark ? Color.white.opacity(0.02) : Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
+                            .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05), lineWidth: 1)
+                    )
+                }
+                .padding(.horizontal)
+                .padding(.top, 6)
+                .padding(.bottom, 8)
+                
+                if viewModel.selectedImage == nil {
+                    HStack(spacing: 12) {
                         Button(action: {
                             isCameraPresented = true
                         }) {
-                            Label("Kamera", systemImage: "camera.fill")
+                            Label("Camera", systemImage: "camera.fill")
+                                .font(.system(.footnote, design: .rounded).weight(.semibold))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 40)
+                                .background(AppTheme.accentColor)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
-                        .primaryButtonStyle(color: AppTheme.accentColor)
                         
                         PhotosPicker(selection: $photoItem, matching: .images, photoLibrary: .shared()) {
-                            Label("Galeri", systemImage: "photo.on.rectangle.angled")
+                            Label("Gallery", systemImage: "photo.on.rectangle.angled")
+                                .font(.system(.footnote, design: .rounded).weight(.semibold))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 40)
+                                .background(Color(UIColor.systemGray2))
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
-                        .primaryButtonStyle(color: Color(UIColor.systemGray2))
                         .onChange(of: photoItem) { _, newItem in
                             Task {
                                 if let data = try? await newItem?.loadTransferable(type: Data.self),
@@ -96,69 +83,101 @@ struct ImageClassificationScreen: View {
                                 }
                             }
                         }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                } else {
+                    HStack(spacing: 10) {
+                        Button(action: {
+                            showOriginalImage.toggle()
+                        }) {
+                            Image(systemName: "rectangle.2.swap")
+                                .font(.system(.body, design: .rounded).weight(.semibold))
+                                .foregroundStyle(!showOriginalImage ? Color.blue : (colorScheme == .dark ? Color.white : Color.primary))
+                                .frame(width: 40, height: 40)
+                                .background(Color(UIColor.secondarySystemFill))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
                         
-                        if viewModel.selectedImage != nil {
-                            Button(action: {
-                                viewModel.reset()
-                                photoItem = nil
-                            }) {
-                                Image(systemName: "arrow.counterclockwise")
-                                    .font(.system(.headline, design: .rounded).weight(.semibold))
-                                    .foregroundStyle(.white)
-                                    .frame(width: 52, height: 52)
-                                    .background(Color.red)
-                                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        Button(action: {
+                            viewModel.reset()
+                            photoItem = nil
+                            showOriginalImage = false
+                        }) {
+                            Label("Reset", systemImage: "arrow.counterclockwise")
+                                .font(.system(.footnote, design: .rounded).weight(.semibold))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 40)
+                                .background(Color.red)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
+                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(viewModel.predictions.isEmpty ? "Instructions" : "Prediction Results")
+                        .font(.system(.footnote, design: .rounded).weight(.bold))
+                        .foregroundStyle(AppTheme.textSecondary)
+                    
+                    if viewModel.isProcessing {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Analyzing image...")
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundStyle(AppTheme.textSecondary)
+                        }
+                    } else if viewModel.predictions.isEmpty {
+                        Text(viewModel.statusMessage)
+                            .font(.system(.caption, design: .rounded))
+                            .foregroundStyle(AppTheme.textPrimary)
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(3)
+                    } else {
+                        VStack(alignment: .leading, spacing: 3) {
+                            ForEach(Array(viewModel.predictions.enumerated()), id: \.element.id) { index, pred in
+                                HStack(spacing: 6) {
+                                    Image(systemName: index == 0 ? "checkmark.seal.fill" : (index == 1 ? "2.circle.fill" : "3.circle.fill"))
+                                        .font(.caption)
+                                        .foregroundStyle(index == 0 ? Color.green : Color.secondary)
+                                    Text("\(pred.letter) (\(pred.confidence)%)")
+                                        .font(.system(.caption, design: .rounded).weight(index == 0 ? .semibold : .regular))
+                                        .foregroundStyle(AppTheme.textPrimary)
+                                }
                             }
                         }
                     }
-                    .padding(.top, 8)
+                    
+                    if !viewModel.predictions.isEmpty {
+                        Spacer(minLength: 0)
+                        
+                        HStack {
+                            Spacer()
+                            Text("AI may make mistakes")
+                                .font(.system(.caption2, design: .rounded))
+                                .foregroundStyle(AppTheme.textSecondary.opacity(0.8))
+                                .lineLimit(1)
+                        }
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .frame(height: 90, alignment: .topLeading)
                 .cardStyle()
                 .padding(.horizontal)
-                .padding(.top, 16)
-                .padding(.bottom, 24)
+                .padding(.bottom, 8)
             }
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(viewModel.predictions.isEmpty ? "Instruksi" : "Hasil Prediksi")
-                    .font(.system(.subheadline, design: .rounded).weight(.bold))
-                    .foregroundStyle(AppTheme.textSecondary)
-                
-                if viewModel.isProcessing {
-                    HStack(spacing: 12) {
-                        ProgressView()
-                        Text("Menganalisis...")
-                            .font(.system(.body, design: .rounded))
-                            .foregroundStyle(AppTheme.textSecondary)
-                    }
-                } else if viewModel.predictions.isEmpty {
-                    Text(viewModel.statusMessage)
-                        .font(.system(.body, design: .rounded))
-                        .foregroundStyle(AppTheme.textPrimary)
-                        .multilineTextAlignment(.leading)
-                } else {
-                    VStack(alignment: .leading, spacing: 6) {
-                        ForEach(Array(viewModel.predictions.enumerated()), id: \.element.id) { index, pred in
-                            HStack(spacing: 8) {
-                                Image(systemName: index == 0 ? "checkmark.seal.fill" : (index == 1 ? "2.circle.fill" : "3.circle.fill"))
-                                    .foregroundStyle(index == 0 ? Color.green : Color.secondary)
-                                Text("\(pred.letter) (\(pred.confidence)%)")
-                                    .font(.system(.body, design: .rounded))
-                                    .foregroundStyle(AppTheme.textPrimary)
-                            }
-                        }
-                    }
+            .background(AppTheme.primaryBackground.ignoresSafeArea())
+            .navigationTitle("Camera Scanner")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ThemeMenuButton()
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
-            .padding()
-            .background(AppTheme.secondaryBackground)
-            .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous))
-            .shadow(color: Color.black.opacity(0.03), radius: 5, x: 0, y: -3)
-            .padding(.horizontal)
-            .padding(.bottom, 16)
         }
-        .background(AppTheme.primaryBackground.ignoresSafeArea())
         .fullScreenCover(isPresented: $isCameraPresented) {
             CameraPicker(image: Binding(
                 get: { viewModel.selectedImage },
@@ -173,7 +192,12 @@ struct ImageClassificationScreen: View {
     }
 }
 
-
-#Preview {
+#Preview("Light Mode") {
     ImageClassificationScreen()
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark Mode") {
+    ImageClassificationScreen()
+        .preferredColorScheme(.dark)
 }

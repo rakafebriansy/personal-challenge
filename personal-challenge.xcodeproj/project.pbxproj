@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		39507164304B9AA2006E1E9F /* LlamaSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 39507163304B9AA2006E1E9F /* LlamaSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		960CBADC30368FC900FA4955 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39507164304B9AA2006E1E9F /* LlamaSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,12 +90,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		39507162304B9AA2006E1E9F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		960CBAC330368FC900FA4955 = {
 			isa = PBXGroup;
 			children = (
 				960CBACE30368FC900FA4955 /* personal-challenge */,
 				960CBADE30368FC900FA4955 /* personal-challengeTests */,
 				960CBAE830368FC900FA4955 /* personal-challengeUITests */,
+				39507162304B9AA2006E1E9F /* Frameworks */,
 				960CBACD30368FC900FA4955 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -125,6 +138,7 @@
 			);
 			name = "personal-challenge";
 			packageProductDependencies = (
+				39507163304B9AA2006E1E9F /* LlamaSwift */,
 			);
 			productName = "personal-challenge";
 			productReference = 960CBACC30368FC900FA4955 /* personal-challenge.app */;
@@ -208,6 +222,9 @@
 			);
 			mainGroup = 960CBAC330368FC900FA4955;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3934F8E5304B9816002BAA7D /* XCRemoteSwiftPackageReference "llama" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 960CBACD30368FC900FA4955 /* Products */;
 			projectDirPath = "";
@@ -597,6 +614,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3934F8E5304B9816002BAA7D /* XCRemoteSwiftPackageReference "llama" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mattt/llama.swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10549.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		39507163304B9AA2006E1E9F /* LlamaSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3934F8E5304B9816002BAA7D /* XCRemoteSwiftPackageReference "llama" */;
+			productName = LlamaSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 960CBAC430368FC900FA4955 /* Project object */;
 }

@@ -22,9 +22,10 @@ enum VoiceState: Equatable {
 class VoiceViewModel: NSObject {
     var voiceState: VoiceState = .idle
     var countdownValue: Int = 3
-    var detectedLetter: String = ""
+    var detectedLetter: HijaiyahLetter?
+    var detectedRawLabel: String = ""
     var detectedConfidence: Double = 0.0
-    var targetLetter: String = ""
+    var targetLetter: HijaiyahLetter?
     
     private let audioService = MLAudioService()
     private var countdownTimer: Timer?
@@ -37,9 +38,10 @@ class VoiceViewModel: NSObject {
         audioService.delegate = self
     }
     
-    func startSession(targetLetter: String) {
+    func startSession(targetLetter: HijaiyahLetter) {
         self.targetLetter = targetLetter
-        self.detectedLetter = ""
+        self.detectedLetter = nil
+        self.detectedRawLabel = ""
         self.detectedConfidence = 0.0
         startCountdown()
     }
@@ -48,14 +50,17 @@ class VoiceViewModel: NSObject {
         stopAllTimers()
         audioService.stopRecording()
         voiceState = .idle
-        detectedLetter = ""
+        detectedLetter = nil
+        detectedRawLabel = ""
         detectedConfidence = 0.0
         countdownValue = 3
+        AppRouter.shared.isTabBarDisabled = false
     }
     
     private func startCountdown() {
         countdownValue = 3
         voiceState = .countdown
+        AppRouter.shared.isTabBarDisabled = true
         
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
             [weak self] timer in
@@ -74,11 +79,13 @@ class VoiceViewModel: NSObject {
     
     private func startRecording() {
         voiceState = .recording
+        AppRouter.shared.isTabBarDisabled = true
         
         do {
             try audioService.startRecording()
         } catch {
             voiceState = .error("Failed to access microphone: \(error.localizedDescription)")
+            AppRouter.shared.isTabBarDisabled = false
         }
         
         recordingTimer = Timer.scheduledTimer(withTimeInterval: recordingDuration, repeats: false) {
@@ -91,6 +98,7 @@ class VoiceViewModel: NSObject {
         recordingTimer?.invalidate()
         audioService.stopRecording()
         voiceState = .processing
+        AppRouter.shared.isTabBarDisabled = true
         
         Task {
             @MainActor [weak self] in
@@ -100,12 +108,20 @@ class VoiceViewModel: NSObject {
     }
     
     private func evaluateResult() {
-        guard !detectedLetter.isEmpty else {
-            voiceState = .error("No sound detected. Please try again.")
+        AppRouter.shared.isTabBarDisabled = false
+        let parsed = detectedLetter ?? HijaiyahLetter.from(audioLabel: detectedRawLabel)
+        self.detectedLetter = parsed
+        
+        guard let detected = parsed else {
+            if detectedRawLabel.isEmpty {
+                voiceState = .error("No sound detected. Please speak clearly into the microphone.")
+            } else {
+                voiceState = .incorrect
+            }
             return
         }
         
-        if detectedLetter.lowercased() == targetLetter.lowercased() {
+        if let target = targetLetter, detected == target {
             voiceState = .correct
         } else {
             voiceState = .incorrect
@@ -122,12 +138,22 @@ class VoiceViewModel: NSObject {
     var confidenceText: String {
         return String(format: "%.0f%%", detectedConfidence * 100)
     }
+    
+    var detectedDisplayName: String {
+        if let detected = detectedLetter {
+            return detected.displayName
+        } else if let parsed = HijaiyahLetter.from(audioLabel: detectedRawLabel) {
+            return parsed.displayName
+        }
+        return detectedRawLabel.isEmpty ? "Unknown" : detectedRawLabel.capitalized
+    }
 }
 
 extension VoiceViewModel: MLAudioServiceDelegate {
     func audioService(_ service: MLAudioService, didClassify result: String, confidence: Double) {
         if confidence > detectedConfidence {
-            detectedLetter = result
+            detectedRawLabel = result
+            detectedLetter = HijaiyahLetter.from(audioLabel: result)
             detectedConfidence = confidence
         }
     }
@@ -135,5 +161,6 @@ extension VoiceViewModel: MLAudioServiceDelegate {
     func audioService(_ service: MLAudioService, didEncounterError error: any Error) {
         stopAllTimers()
         voiceState = .error("Error while analyzing audio: \(error.localizedDescription)")
+        AppRouter.shared.isTabBarDisabled = false
     }
 }

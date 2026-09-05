@@ -12,7 +12,7 @@ import SwiftUI
 class ScannerViewModel {
     var selectedImage: UIImage? = nil
     var debugProcessedImage: UIImage? = nil
-    var statusMessage: String = "Belum ada foto."
+    var statusMessage: String = "Take a photo or select an image from the gallery to scan Hijaiyah letters."
     var predictions: [Prediction] = []
     var isProcessing: Bool = false
     
@@ -21,10 +21,9 @@ class ScannerViewModel {
     func processImage(_ image: UIImage) {
         self.selectedImage = image
         self.isProcessing = true
-        self.statusMessage = "Menganalisis..."
+        self.statusMessage = "Analyzing image..."
         self.predictions = []
         
-        // Pass UIImage directly — orientation is handled inside MLVisionService via CIImage(image:)
         mlService.classifyImage(image: image) { [weak self] preds, errorMsg, debugImage in
             Task {
                 @MainActor in
@@ -39,7 +38,7 @@ class ScannerViewModel {
     func reset() {
         self.selectedImage = nil
         self.debugProcessedImage = nil
-        self.statusMessage = "Belum ada foto."
+        self.statusMessage = "Take a photo or select an image from the gallery to scan Hijaiyah letters."
         self.predictions = []
         self.isProcessing = false
     }

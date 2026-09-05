@@ -12,7 +12,7 @@ import SwiftUI
 class CanvasViewModel {
     var lines: [Line] = []
     
-    var statusMessage: String = "Gambar huruf di atas, lalu tekan 'Periksa'."
+    var statusMessage: String = "Draw a Hijaiyah letter on the canvas above, then tap 'Check Drawing'."
     var predictions: [Prediction] = []
     var isProcessing: Bool = false
     var debugProcessedImage: UIImage? = nil
@@ -21,7 +21,7 @@ class CanvasViewModel {
     
     func clear() {
         lines = []
-        statusMessage = "Gambar huruf di atas, lalu tekan 'Periksa'."
+        statusMessage = "Draw a Hijaiyah letter on the canvas above, then tap 'Check Drawing'."
         predictions = []
         debugProcessedImage = nil
     }
@@ -29,20 +29,20 @@ class CanvasViewModel {
     func undo() {
         guard !lines.isEmpty else { return }
         lines.removeLast()
-        statusMessage = "Gambar huruf di atas, lalu tekan 'Periksa'."
+        statusMessage = "Draw a Hijaiyah letter on the canvas above, then tap 'Check Drawing'."
         predictions = []
         debugProcessedImage = nil
     }
     
     func checkDrawing(canvasSize: CGSize) {
         guard !lines.isEmpty else {
-            statusMessage = "Kanvas masih kosong! Coba gambar dulu."
+            statusMessage = "Canvas is empty! Draw a letter first."
             predictions = []
             return
         }
         
         isProcessing = true
-        statusMessage = "Menganalisis..."
+        statusMessage = "Analyzing drawing..."
         predictions = []
         
         let image = renderCanvasToImage(size: canvasSize)
@@ -83,12 +83,10 @@ class CanvasViewModel {
             }
         }
         
-        // Beri padding agar gambar tidak menyentuh ujung (membantu model ML)
         let padding: CGFloat = 40.0
         let rectWidth = (maxX - minX) + (padding * 2)
         let rectHeight = (maxY - minY) + (padding * 2)
         
-        // Buat kanvas menjadi persegi agar tidak terpotong (crop) oleh .centerCrop saat di-proses
         let squareSize = max(rectWidth, rectHeight)
         let finalSize = CGSize(width: squareSize, height: squareSize)
         
@@ -103,14 +101,12 @@ class CanvasViewModel {
             cgContext.setLineJoin(.round)
             cgContext.setStrokeColor(UIColor.black.cgColor)
             
-            // Hitung offset agar gambar berada tepat di tengah kotak
             let offsetX = (squareSize - (maxX - minX)) / 2 - minX
             let offsetY = (squareSize - (maxY - minY)) / 2 - minY
             
             for line in lines {
                 guard let firstPoint = line.points.first else { continue }
                 
-                // Gunakan ketebalan tinta yang sedikit lebih tebal secara proporsional
                 let scalingFactor = max(1.0, squareSize / 200.0)
                 cgContext.setLineWidth(line.lineWidth * scalingFactor)
                 

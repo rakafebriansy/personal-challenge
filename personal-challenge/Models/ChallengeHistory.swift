@@ -15,17 +15,19 @@ final class ChallengeHistory {
     var totalQuestions: Int = 5
     var correctAnswers: Int = 5
     var score: Int = 100
+    var missedLetters: [String] = [] 
     
-    init(date: Date, totalQuestions: Int, correctAnswers: Int, score: Int) {
+    init(date: Date, totalQuestions: Int, correctAnswers: Int, score: Int, missedLetters: [String] = []) {
         self.date = date
         self.totalQuestions = totalQuestions
         self.correctAnswers = correctAnswers
         self.score = score
+        self.missedLetters = missedLetters
     }
     
     var formattedDate: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "id_ID")
+        formatter.locale = Locale.current
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)

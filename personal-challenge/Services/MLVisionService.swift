@@ -17,8 +17,6 @@ struct Prediction: Identifiable, Hashable {
     let confidence: Int
 }
 
-// Map UIImage.Orientation to CGImagePropertyOrientation
-// so CIImage.oriented() can correctly bake the rotation into pixels
 private extension UIImage.Orientation {
     var cgImagePropertyOrientation: CGImagePropertyOrientation {
         switch self {
@@ -64,37 +62,49 @@ class MLVisionService {
     
     private let ciContext = CIContext()
     
+    private func flattenTransparentBackground(_ image: UIImage) -> UIImage {
+        let size = image.size
+        guard size.width > 0 && size.height > 0 else { return image }
+        
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = image.scale
+        format.opaque = true
+        
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+    }
+    
     func classifyImage(image: UIImage, completion: @escaping ([Prediction], String?, UIImage?) -> Void) {
         guard let model = visionModel else {
             completion([], "Error: model is not ready yet.", nil)
             return
         }
         
-        // Step 1: Get raw CGImage
-        guard let cgImage = image.cgImage else {
+        let opaqueImage = flattenTransparentBackground(image)
+        
+        guard let cgImage = opaqueImage.cgImage else {
             completion([], "Failed to read CGImage.", nil)
             return
         }
         
-        // Step 2: Bake orientation into the pixel data using CIImage.oriented()
         let rawCIImage = CIImage(cgImage: cgImage)
-        let orientedCIImage = rawCIImage.oriented(image.imageOrientation.cgImagePropertyOrientation)
+        let orientedCIImage = rawCIImage.oriented(opaqueImage.imageOrientation.cgImagePropertyOrientation)
         guard let orientedCGImage = ciContext.createCGImage(orientedCIImage, from: orientedCIImage.extent) else {
             completion([], "Failed to process image orientation.", nil)
             return
         }
         
-        // Step 3: PRE-PROCESSING — Adaptive Binarization (Pure Black Background, Pure White Text)
-        // Ensures yellow paper, white paper, shadows, and varying lighting produce crisp binary images.
         guard let binarizedCGImage = binarizeForClassifier(cgImage: orientedCGImage, targetSize: 360) else {
             completion([], "Failed to binarize image.", nil)
             return
         }
         
-        // Debug image: shows exactly what the model sees (Clean Black and White)
         let debugImage = UIImage(cgImage: binarizedCGImage)
         
-        // Step 4: Run Vision request on the processed binary image
         let request = VNCoreMLRequest(model: model) { request, error in
             if let error = error {
                 completion([], "Error: \(error.localizedDescription)", debugImage)
@@ -125,9 +135,6 @@ class MLVisionService {
         }
     }
     
-    /// Converts input image to pure black-and-white (binary) format matching the model training dataset:
-    /// Background = 0 (Pure Black), Text Stroke = 255 (Pure White).
-    /// Uses Bradley-Roth Adaptive Thresholding with integral image for robust performance across yellow/white paper and shadows.
     private func binarizeForClassifier(cgImage: CGImage, targetSize: Int = 360) -> CGImage? {
         let origWidth = cgImage.width
         let origHeight = cgImage.height
@@ -140,7 +147,7 @@ class MLVisionService {
         )
         guard let croppedCGImage = cgImage.cropping(to: cropRect) else { return nil }
         
-        var grayData = [UInt8](repeating: 0, count: targetSize * targetSize)
+        var grayData = [UInt8](repeating: 255, count: targetSize * targetSize)
         let grayColorSpace = CGColorSpaceCreateDeviceGray()
         guard let grayCtx = CGContext(
             data: &grayData,
@@ -152,10 +159,11 @@ class MLVisionService {
             bitmapInfo: CGImageAlphaInfo.none.rawValue
         ) else { return nil }
         
+        grayCtx.setFillColor(gray: 1.0, alpha: 1.0)
+        grayCtx.fill(CGRect(x: 0, y: 0, width: targetSize, height: targetSize))
         grayCtx.interpolationQuality = .high
         grayCtx.draw(croppedCGImage, in: CGRect(x: 0, y: 0, width: targetSize, height: targetSize))
         
-        // 1. Polarity check: check border average to see if image is already light-on-dark
         var borderSum = 0
         var borderCount = 0
         for x in 0..<targetSize {
@@ -175,7 +183,6 @@ class MLVisionService {
             }
         }
         
-        // 2. Compute Integral Image for fast local mean computation
         var integral = [Int32](repeating: 0, count: targetSize * targetSize)
         for y in 0..<targetSize {
             var sum: Int32 = 0
@@ -191,7 +198,6 @@ class MLVisionService {
             }
         }
         
-        // 3. Bradley-Roth Adaptive Thresholding
         let S = max(15, targetSize / 7)
         let s2 = S / 2
         let thresholdPercent: Float = 0.12
@@ -218,11 +224,10 @@ class MLVisionService {
                 let val = Int32(grayData[row + x])
                 let avg = sum / count
                 
-                // Pixel is ink if it is darker than local average AND has a minimum contrast delta
                 if Float(val * count) < Float(sum) * t && (avg - val) >= 14 {
-                    outputData[row + x] = 255 // Pure White text
+                    outputData[row + x] = 255
                 } else {
-                    outputData[row + x] = 0   // Pure Black background
+                    outputData[row + x] = 0
                 }
             }
         }

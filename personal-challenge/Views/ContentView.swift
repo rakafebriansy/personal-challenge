@@ -2,44 +2,44 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var router = AppRouter.shared
-    
-    let hijaiyahList = HijaiyahLetter.allLetters
+    @State private var permissionManager = PermissionManager.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("selectedThemeMode") private var themeMode: AppThemeMode = .system
+
+    private var tabSelectionBinding: Binding<AppTab> {
+        Binding(
+            get: { router.selectedTab },
+            set: { newTab in
+                if !router.isTabBarDisabled {
+                    router.selectedTab = newTab
+                }
+            }
+        )
+    }
 
     var body: some View {
-        TabView (selection: $router.selectedTab) {
-            ImageClassificationScreen()
-                .tabItem {
-                    Label("Scanner", systemImage: "camera.viewfinder")
-                }
-                .tag(AppTab.scanner)
-            
+        TabView(selection: tabSelectionBinding) {
             DrawingCanvasScreen()
                 .tabItem {
                     Label("Canvas", systemImage: "pencil.and.scribble")
                 }
                 .tag(AppTab.canvas)
-            
-            NavigationStack {
-                List(hijaiyahList, id: \.letter) { item in
-                    NavigationLink {
-                        VoicePronunciationScreen(targetLetter: item.letter, targetArabic: item.arabic)
-                    } label: {
-                        HStack {
-                            Text(item.arabic)
-                                .font(.title)
-                                .frame(width: 50)
-                            Text(item.letter.capitalized)
-                                .font(.headline)
-                        }
-                        .padding(.vertical, 4)
+
+            if permissionManager.isCameraAuthorized {
+                ImageClassificationScreen()
+                    .tabItem {
+                        Label("Scanner", systemImage: "camera.viewfinder")
                     }
-                }
-                .navigationTitle("Latihan Suara")
+                    .tag(AppTab.scanner)
             }
-            .tabItem {
-                Label("Voice", systemImage: "mic.fill")
+            
+            if permissionManager.isMicrophoneAuthorized {
+                VoicePronunciationScreen()
+                    .tabItem {
+                        Label("Voice", systemImage: "mic.fill")
+                    }
+                    .tag(AppTab.voice)
             }
-            .tag(AppTab.voice)
             
             ChallengeScreen()
                 .tabItem {
@@ -47,5 +47,44 @@ struct ContentView: View {
                 }
                 .tag(AppTab.challenge)
         }
+        .overlay(alignment: .bottom) {
+            if router.isTabBarDisabled {
+                Color.black.opacity(0.001)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 84)
+                    .contentShape(Rectangle())
+                    .onTapGesture { }
+                    .ignoresSafeArea(.all, edges: .bottom)
+            }
+        }
+        .preferredColorScheme(themeMode.colorScheme)
+        .task {
+            await permissionManager.requestAllPermissions()
+            validateTabSelection()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                permissionManager.checkPermissions()
+                validateTabSelection()
+            }
+        }
     }
+    
+    private func validateTabSelection() {
+        if router.selectedTab == .scanner && !permissionManager.isCameraAuthorized {
+            router.selectedTab = .canvas
+        } else if router.selectedTab == .voice && !permissionManager.isMicrophoneAuthorized {
+            router.selectedTab = .canvas
+        }
+    }
+}
+
+#Preview("Light Mode") {
+    ContentView()
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark Mode") {
+    ContentView()
+        .preferredColorScheme(.dark)
 }

@@ -34,6 +34,7 @@ final class ChallengeViewModel {
     var questions: [ChallengeQuestion] = []
     var currentQuestionIndex: Int = 0
     var correctAnswersCount: Int = 0
+    var currentMissedLetters: [String] = []
     
     var selectedOption: HijaiyahLetterOption? = nil
     var isAnswerEvaluated: Bool = false
@@ -65,6 +66,7 @@ final class ChallengeViewModel {
         
         correctAnswersCount = 0
         currentQuestionIndex = 0
+        currentMissedLetters = []
         selectedOption = nil
         isAnswerEvaluated = false
         
@@ -113,7 +115,10 @@ final class ChallengeViewModel {
         
         if option.letter == question.targetLetter {
             correctAnswersCount += 1
+        } else {
+            currentMissedLetters.append(question.targetLetter)
         }
+
     }
     
     func nextQuestion(modelContext: ModelContext) {
@@ -121,7 +126,6 @@ final class ChallengeViewModel {
             currentQuestionIndex += 1
             selectedOption = nil
             isAnswerEvaluated = false
-            playCurrentAudio()
         } else {
             state = .finished
             saveToSwiftData(modelContext: modelContext)
@@ -134,10 +138,17 @@ final class ChallengeViewModel {
         selectedOption = nil
         isAnswerEvaluated = false
         currentQuestionIndex = 0
+        currentMissedLetters = []
     }
     
     private func saveToSwiftData(modelContext: ModelContext) {
-        let history = ChallengeHistory(date: Date(), totalQuestions: questionCount, correctAnswers: correctAnswersCount, score: finalScore)
+        let history = ChallengeHistory(
+            date: Date(),
+            totalQuestions: questionCount,
+            correctAnswers: correctAnswersCount,
+            score: finalScore,
+            missedLetters: currentMissedLetters
+        )
         modelContext.insert(history)
         
         do {
