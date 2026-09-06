@@ -146,6 +146,7 @@ struct VoicePronunciationScreen: View {
             .padding(.horizontal, 4)
             
             Divider()
+                .padding(.vertical, 6)
             
             visualizerView
                 .frame(height: 70)

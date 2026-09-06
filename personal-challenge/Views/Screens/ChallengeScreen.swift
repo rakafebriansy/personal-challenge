@@ -77,18 +77,11 @@ struct ChallengeScreen: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     HStack(spacing: 6) {
-                        Image(systemName: "clock.arrow.circlepath")
-                            .font(.subheadline)
-                            .foregroundStyle(AppTheme.accentColor)
                         Text("Recent History")
                             .font(.system(.subheadline, design: .rounded).weight(.bold))
                             .foregroundStyle(AppTheme.textPrimary)
-                    }
-                    
-                    Spacer()
-                    
-                    if !historyList.isEmpty {
-                        HStack(spacing: 6) {
+                        
+                        if !historyList.isEmpty {
                             Text("\(historyList.count) \(historyList.count == 1 ? "Session" : "Sessions")")
                                 .font(.system(.caption2, design: .rounded).weight(.semibold))
                                 .padding(.horizontal, 6)
@@ -96,15 +89,19 @@ struct ChallengeScreen: View {
                                 .background(AppTheme.accentColor.opacity(0.12))
                                 .foregroundStyle(AppTheme.accentColor)
                                 .clipShape(Capsule())
-                            
-                            Button(action: {
-                                showResetHistoryAlert = true
-                            }) {
-                                Image(systemName: "trash")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(Color.red.opacity(0.85))
-                                    .padding(3)
-                            }
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    if !historyList.isEmpty {
+                        Button(action: {
+                            showResetHistoryAlert = true
+                        }) {
+                            Image(systemName: "trash")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.red.opacity(0.85))
+                                .padding(4)
                         }
                     }
                 }
@@ -313,7 +310,7 @@ struct ChallengeScreen: View {
             }
             .frame(height: 136)
             .padding(.horizontal)
-            .padding(.bottom, 8)
+            .padding(.bottom, 12)
             
             if let question = viewModel.currentQuestion {
                 VStack(spacing: 6) {
@@ -359,32 +356,34 @@ struct ChallengeScreen: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 8)
             }
             
-            Spacer()
-            
             if viewModel.isAnswerEvaluated {
-                Button(action: {
-                    viewModel.nextQuestion(modelContext: modelContext)
-                }) {
-                    Text(viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "See Final Results" : "Next Question")
+                HStack {
+                    Spacer()
+                    
+                    Button(action: {
+                        viewModel.nextQuestion(modelContext: modelContext)
+                    }) {
+                        HStack(spacing: 6) {
+                            Text(viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "Finish" : "Next")
+                            Image(systemName: viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "trophy.fill" : "arrow.right")
+                                .font(.caption.weight(.bold))
+                        }
                         .font(.system(.footnote, design: .rounded).weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
+                        .padding(.horizontal, 16)
+                        .frame(height: 38)
                         .background(AppTheme.accentColor)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 8)
+                .padding(.top, 12)
                 .transition(.opacity.combined(with: .move(edge: .bottom)))
-            } else {
-                Text("Select the matching Arabic letter above")
-                    .font(.system(.caption, design: .rounded))
-                    .foregroundStyle(AppTheme.textSecondary)
-                    .padding(.bottom, 8)
             }
+            
+            Spacer()
         }
     }
     
@@ -392,38 +391,37 @@ struct ChallengeScreen: View {
         VStack {
             Spacer()
             
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 ZStack {
                     Circle()
                         .fill(viewModel.finalScore == 100 ? Color.green.opacity(0.12) : AppTheme.accentColor.opacity(0.12))
-                        .frame(width: 76, height: 76)
+                        .frame(width: 50, height: 50)
                     
                     Image(systemName: viewModel.finalScore == 100 ? "trophy.fill" : "rosette")
-                        .font(.largeTitle)
+                        .font(.title3)
                         .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
                 }
                 
-                VStack(spacing: 4) {
+                VStack(spacing: 3) {
                     Text(viewModel.finalScore == 100 ? "Outstanding! Perfect 🏆" : "Challenge Completed!")
-                        .font(.system(.headline, design: .rounded).weight(.bold))
+                        .font(.system(.subheadline, design: .rounded).weight(.bold))
                         .foregroundStyle(AppTheme.textPrimary)
                     
                     Text("Your Score:")
-                        .font(.system(.caption, design: .rounded).weight(.medium))
+                        .font(.system(.caption2, design: .rounded).weight(.medium))
                         .foregroundStyle(AppTheme.textSecondary)
                     
                     Text("\(viewModel.finalScore)")
-                        .font(.system(.largeTitle, design: .rounded).weight(.heavy))
+                        .font(.system(.title2, design: .rounded).weight(.heavy))
                         .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
                     
                     Text("Answered \(viewModel.correctAnswersCount) of \(viewModel.questionCount) questions correctly (\(viewModel.finalScore)%)")
-                        .font(.system(.caption, design: .rounded))
+                        .font(.system(.caption2, design: .rounded))
                         .foregroundStyle(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)
                 }
                 
                 Divider()
-                    .padding(.vertical, 2)
                 
                 Button(action: {
                     isPlayingChallenge = false
@@ -432,15 +430,12 @@ struct ChallengeScreen: View {
                     Label("Back to Challenge Menu", systemImage: "arrow.counterclockwise")
                         .font(.system(.footnote, design: .rounded).weight(.semibold))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 38)
+                        .frame(height: 36)
                         .background(AppTheme.accentColor)
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .padding(.horizontal, 16)
             .cardStyle()
             .padding(.horizontal)
             

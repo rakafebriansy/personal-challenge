@@ -58,16 +58,6 @@ struct AIEvaluationCardView: View {
                     
                     Spacer()
                 } else if evaluationText.isEmpty {
-                    HStack(spacing: 5) {
-                        Image(systemName: "sparkles")
-                            .font(.caption)
-                            .foregroundStyle(Color.orange)
-                        Text("AI Evaluator")
-                            .font(.system(.caption, design: .rounded).weight(.semibold))
-                            .foregroundStyle(AppTheme.textSecondary)
-                    }
-                    .frame(height: 28)
-                    
                     Spacer()
                     
                     Button(action: startEvaluation) {
