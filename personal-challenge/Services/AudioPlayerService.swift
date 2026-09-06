@@ -12,6 +12,7 @@ import AVFoundation
 final class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
     private var audioPlayer: AVAudioPlayer?
     var isPlaying: Bool = false
+    var playbackError: String? = nil
     
     func playRandomSound(for letter: String, variationCount: Int = 3) {
         let randomIndex = Int.random(in: 1...variationCount)
@@ -22,10 +23,13 @@ final class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
     
     func playSound(named soundName: String) {
         stop()
+        playbackError = nil
         
         guard let url = Bundle.main.url(forResource: soundName.lowercased(), withExtension: "wav") ??
                 Bundle.main.url(forResource: soundName.lowercased(), withExtension: "mp3") else {
-            print("Audio file '\(soundName)' is not found in app bundle.")
+            let errorMsg = "Audio file '\(soundName)' not found in app bundle."
+            print("[AudioPlayerService] \(errorMsg)")
+            self.playbackError = errorMsg
             return
         }
         
@@ -39,8 +43,11 @@ final class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
             audioPlayer?.play()
             
             isPlaying = true
+            playbackError = nil
         } catch {
-            print("Failed to play audio: \(error.localizedDescription)")
+            let errorMsg = "Failed to play audio: \(error.localizedDescription)"
+            print("[AudioPlayerService] \(errorMsg)")
+            self.playbackError = errorMsg
         }
     }
     

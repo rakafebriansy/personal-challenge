@@ -48,11 +48,15 @@ struct ChallengeScreen: View {
                             .font(.system(.caption2, design: .rounded))
                             .foregroundStyle(AppTheme.textSecondary)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Number of questions: \(viewModel.questionCount). Select between 3 and 20 questions.")
                     
                     Spacer()
                     
-                    Stepper("", value: $viewModel.questionCount, in: 3...20)
+                    Stepper("Number of questions", value: $viewModel.questionCount, in: 3...20)
                         .labelsHidden()
+                        .accessibilityLabel("Change question count")
+                        .accessibilityValue("\(viewModel.questionCount) questions")
                     
                     Button(action: {
                         viewModel.startChallenge()
@@ -66,6 +70,8 @@ struct ChallengeScreen: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
+                    .accessibilityLabel("Start Challenge")
+                    .accessibilityHint("Double tap to start listening challenge with \(viewModel.questionCount) questions")
                 }
                 
                 Divider()
@@ -91,6 +97,8 @@ struct ChallengeScreen: View {
                                 .clipShape(Capsule())
                         }
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(historyList.isEmpty ? "Recent History" : "Recent History, \(historyList.count) \(historyList.count == 1 ? "Session" : "Sessions")")
                     
                     Spacer()
                     
@@ -103,6 +111,8 @@ struct ChallengeScreen: View {
                                 .foregroundStyle(Color.red.opacity(0.85))
                                 .padding(4)
                         }
+                        .accessibilityLabel("Delete all challenge history")
+                        .accessibilityHint("Double tap to clear all past challenge sessions")
                     }
                 }
                 
@@ -114,6 +124,7 @@ struct ChallengeScreen: View {
                         Image(systemName: "trophy")
                             .font(.title)
                             .foregroundStyle(Color.secondary.opacity(0.35))
+                            .accessibilityHidden(true)
                         Text("No challenge history yet.\nStart your first session to track progress!")
                             .font(.system(.caption, design: .rounded))
                             .foregroundStyle(AppTheme.textSecondary)
@@ -121,6 +132,8 @@ struct ChallengeScreen: View {
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("No challenge history yet. Start your first session to track progress.")
                 } else {
                     ScrollView(.vertical, showsIndicators: false) {
                         LazyVStack(spacing: 6) {
@@ -135,6 +148,7 @@ struct ChallengeScreen: View {
                                             .font(.system(.subheadline, design: .rounded).weight(.semibold))
                                             .foregroundStyle(item.isPerfectScore ? Color.green : (item.score >= 80 ? Color.orange : AppTheme.accentColor))
                                     }
+                                    .accessibilityHidden(true)
                                     
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(item.badgeTitle)
@@ -189,6 +203,8 @@ struct ChallengeScreen: View {
                                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                                         .stroke(colorScheme == .dark ? Color.white.opacity(0.06) : Color.black.opacity(0.02), lineWidth: 1)
                                 )
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("\(item.badgeTitle), score \(item.score) percent, \(item.correctAnswers) of \(item.totalQuestions) correct, taken on \(item.formattedDate)\(item.missedLetters.isEmpty ? "" : ", missed: \(item.missedLetters.joined(separator: ", "))")")
                             }
                         }
                         .padding(.vertical, 2)
@@ -269,9 +285,19 @@ struct ChallengeScreen: View {
                 ProgressView(value: Double(viewModel.currentQuestionIndex + 1), total: Double(viewModel.questionCount))
                     .tint(AppTheme.accentColor)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Question \(viewModel.currentQuestionIndex + 1) of \(viewModel.questionCount), \(viewModel.correctAnswersCount) correct answers so far")
             .padding(.horizontal)
             .padding(.top, 6)
             .padding(.bottom, 8)
+            
+            if let playbackError = viewModel.audioPlayer.playbackError {
+                ErrorBannerView(message: playbackError) {
+                    viewModel.playCurrentAudio()
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+            }
             
             ZStack {
                 RoundedRectangle(cornerRadius: AppTheme.cornerRadius, style: .continuous)
@@ -301,6 +327,8 @@ struct ChallengeScreen: View {
                                 .symbolEffect(.bounce, value: viewModel.audioPlayer.isPlaying)
                         }
                     }
+                    .accessibilityLabel(viewModel.audioPlayer.isPlaying ? "Playing letter sound" : "Play letter sound")
+                    .accessibilityHint("Double tap to listen to the letter pronunciation again")
                     
                     Text("Tap button to listen again")
                         .font(.system(.caption2, design: .rounded))
@@ -317,6 +345,11 @@ struct ChallengeScreen: View {
                     ForEach(question.options) { option in
                         Button(action: {
                             viewModel.selectOption(option)
+                            if option.letter == question.targetLetter {
+                                AccessibilityNotificationHelper.postAnnouncement("Correct answer! \(option.letter.capitalized)")
+                            } else {
+                                AccessibilityNotificationHelper.postAnnouncement("Incorrect. Correct answer was \(question.targetLetter.capitalized)")
+                            }
                         }) {
                             HStack(spacing: 12) {
                                 Text(option.arabic)
@@ -353,6 +386,10 @@ struct ChallengeScreen: View {
                             .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
                         }
                         .disabled(viewModel.isAnswerEvaluated)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Option: \(option.letter.capitalized), Arabic \(option.arabic)")
+                        .accessibilityValue(optionAccessibilityValue(option: option, target: question.targetLetter))
+                        .accessibilityHint(viewModel.isAnswerEvaluated ? "" : "Double tap to select this answer")
                     }
                 }
                 .padding(.horizontal)
@@ -364,6 +401,9 @@ struct ChallengeScreen: View {
                     
                     Button(action: {
                         viewModel.nextQuestion(modelContext: modelContext)
+                        if viewModel.state == .finished {
+                            AccessibilityNotificationHelper.postAnnouncement("Quiz finished. Your score is \(viewModel.finalScore) percent.")
+                        }
                     }) {
                         HStack(spacing: 6) {
                             Text(viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "Finish" : "Next")
@@ -377,6 +417,8 @@ struct ChallengeScreen: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
+                    .accessibilityLabel(viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "Finish Challenge" : "Next Question")
+                    .accessibilityHint(viewModel.currentQuestionIndex + 1 == viewModel.questionCount ? "Double tap to finish quiz and view score" : "Double tap to proceed to next question")
                 }
                 .padding(.horizontal)
                 .padding(.top, 12)
@@ -384,6 +426,19 @@ struct ChallengeScreen: View {
             }
             
             Spacer()
+        }
+    }
+    
+    private func optionAccessibilityValue(option: HijaiyahLetterOption, target: String) -> String {
+        guard viewModel.isAnswerEvaluated else {
+            return ""
+        }
+        if option.letter == target {
+            return "Correct Answer"
+        } else if option == viewModel.selectedOption {
+            return "Your Selected Answer, Incorrect"
+        } else {
+            return "Incorrect Option"
         }
     }
     
@@ -401,6 +456,7 @@ struct ChallengeScreen: View {
                         .font(.title3)
                         .foregroundStyle(viewModel.finalScore == 100 ? Color.green : AppTheme.accentColor)
                 }
+                .accessibilityHidden(true)
                 
                 VStack(spacing: 3) {
                     Text(viewModel.finalScore == 100 ? "Outstanding! Perfect 🏆" : "Challenge Completed!")
@@ -420,6 +476,8 @@ struct ChallengeScreen: View {
                         .foregroundStyle(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Final Score: \(viewModel.finalScore) percent. Answered \(viewModel.correctAnswersCount) of \(viewModel.questionCount) questions correctly.")
                 
                 Divider()
                 
@@ -435,6 +493,8 @@ struct ChallengeScreen: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
+                .accessibilityLabel("Back to Challenge Menu")
+                .accessibilityHint("Double tap to return to setup and review past sessions")
             }
             .cardStyle()
             .padding(.horizontal)

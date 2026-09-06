@@ -32,6 +32,7 @@ struct AIEvaluationCardView: View {
                         .foregroundStyle(AppTheme.textSecondary)
                         .lineSpacing(2)
                         .padding(8)
+                        .accessibilityLabel(history.isEmpty ? "Complete listening challenges to enable AI evaluation" : "Ready for AI evaluation. Tap Evaluate below to generate recommendations.")
                 } else {
                     ScrollView(.vertical, showsIndicators: true) {
                         Text(evaluationText)
@@ -41,6 +42,7 @@ struct AIEvaluationCardView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(8)
                     }
+                    .accessibilityLabel("AI Evaluation: \(evaluationText)")
                 }
             }
             .frame(height: 85)
@@ -55,6 +57,8 @@ struct AIEvaluationCardView: View {
                             .foregroundStyle(AppTheme.textSecondary)
                     }
                     .frame(height: 28)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Generating AI evaluation in progress")
                     
                     Spacer()
                 } else if evaluationText.isEmpty {
@@ -74,6 +78,8 @@ struct AIEvaluationCardView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                     .disabled(history.isEmpty)
+                    .accessibilityLabel("Evaluate quiz history with on-device AI")
+                    .accessibilityHint(history.isEmpty ? "Complete a challenge first to enable" : "Double tap to generate recommendations")
                 } else {
                     Button(action: copyEvaluationText) {
                         Label(isCopied ? "Copied" : "Copy", systemImage: isCopied ? "checkmark" : "doc.on.doc")
@@ -81,6 +87,8 @@ struct AIEvaluationCardView: View {
                             .foregroundStyle(isCopied ? Color.green : AppTheme.textSecondary)
                             .frame(height: 28)
                     }
+                    .accessibilityLabel(isCopied ? "Evaluation copied to clipboard" : "Copy evaluation text")
+                    .accessibilityHint("Double tap to copy AI recommendation to clipboard")
                     
                     Spacer()
                     
@@ -94,6 +102,8 @@ struct AIEvaluationCardView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                     .disabled(history.isEmpty)
+                    .accessibilityLabel("Re-evaluate quiz history")
+                    .accessibilityHint("Double tap to generate fresh AI recommendations")
                 }
             }
             .frame(height: 28)
@@ -108,6 +118,7 @@ struct AIEvaluationCardView: View {
     
     private func copyEvaluationText() {
         UIPasteboard.general.string = evaluationText
+        AccessibilityNotificationHelper.postAnnouncement("Evaluation copied to clipboard")
         withAnimation {
             isCopied = true
         }
@@ -127,6 +138,7 @@ struct AIEvaluationCardView: View {
         isStreaming = true
         hasEvaluated = true
         isCopied = false
+        AccessibilityNotificationHelper.postAnnouncement("Starting AI evaluation of your challenge history")
         
         let prompt = ChallengePromptBuilder.buildEvaluationPrompt(from: history)
         
@@ -152,7 +164,7 @@ struct AIEvaluationCardView: View {
                 }
             } catch {
                 await MainActor.run {
-                    evaluationText = "An error occurred while loading local AI model: \(error.localizedDescription)"
+                    evaluationText = "An error occurred while running on-device AI model: \(error.localizedDescription)"
                 }
             }
             
@@ -163,6 +175,7 @@ struct AIEvaluationCardView: View {
                 }
                 evaluationText = finalCleaned.trimmingCharacters(in: .whitespacesAndNewlines)
                 isStreaming = false
+                AccessibilityNotificationHelper.postAnnouncement("AI evaluation completed")
             }
         }
     }

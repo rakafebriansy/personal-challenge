@@ -33,9 +33,14 @@ struct DrawingCanvasScreen: View {
                                 .resizable()
                                 .scaledToFit()
                                 .padding(8)
+                                .accessibilityLabel("Processed binarized drawing image for AI evaluation")
                         }
                     }
                     .shadow(color: colorScheme == .dark ? Color.white.opacity(0.02) : Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Drawing canvas")
+                    .accessibilityHint("Use your finger to draw a Hijaiyah letter. Tap Check Drawing below when finished.")
+                    .accessibilityValue(viewModel.lines.isEmpty ? "Canvas is empty" : "\(viewModel.lines.count) strokes drawn")
                     .onAppear {
                         canvasSize = geometry.size
                     }
@@ -62,6 +67,8 @@ struct DrawingCanvasScreen: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                         .disabled(isEditDisabled)
+                        .accessibilityLabel("Undo stroke")
+                        .accessibilityHint("Double tap to remove the last drawn stroke")
                         
                         Button(action: { showingClearAlert = true }) {
                             Image(systemName: "trash.fill")
@@ -72,6 +79,8 @@ struct DrawingCanvasScreen: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         }
                         .disabled(isEditDisabled)
+                        .accessibilityLabel("Clear canvas")
+                        .accessibilityHint("Double tap to delete all drawn strokes")
                     }
                     
                     Button(action: {
@@ -102,16 +111,42 @@ struct DrawingCanvasScreen: View {
                         }
                     }
                     .disabled(viewModel.lines.isEmpty || viewModel.isProcessing)
+                    .accessibilityLabel(isShowingProcessedResult ? "Back to Canvas" : (viewModel.isProcessing ? "Analyzing drawing" : "Check Drawing"))
+                    .accessibilityHint(viewModel.lines.isEmpty ? "Draw a letter on the canvas first" : "Double tap to check and classify your drawing")
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)
                 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(viewModel.predictions.isEmpty ? "Instructions" : "Prediction Results")
+                    Text(viewModel.predictions.isEmpty ? (viewModel.errorMessage != nil ? "Error" : "Instructions") : "Prediction Results")
                         .font(.system(.footnote, design: .rounded).weight(.bold))
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(viewModel.errorMessage != nil ? Color.red : AppTheme.textSecondary)
+                        .accessibilityAddTraits(.isHeader)
                     
-                    if viewModel.predictions.isEmpty {
+                    if let error = viewModel.errorMessage {
+                        HStack(spacing: 6) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(Color.red)
+                                .accessibilityHidden(true)
+                            Text(error)
+                                .font(.system(.caption, design: .rounded).weight(.medium))
+                                .foregroundStyle(Color.red)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(3)
+                        }
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel("Error: \(error)")
+                    } else if viewModel.isProcessing {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Analyzing drawing...")
+                                .font(.system(.caption, design: .rounded))
+                                .foregroundStyle(AppTheme.textSecondary)
+                        }
+                        .accessibilityLabel("Analyzing drawing in progress")
+                    } else if viewModel.predictions.isEmpty {
                         Text(viewModel.statusMessage)
                             .font(.system(.caption, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
@@ -124,10 +159,13 @@ struct DrawingCanvasScreen: View {
                                     Image(systemName: index == 0 ? "checkmark.seal.fill" : (index == 1 ? "2.circle.fill" : "3.circle.fill"))
                                         .font(.caption)
                                         .foregroundStyle(index == 0 ? Color.green : Color.secondary)
+                                        .accessibilityHidden(true)
                                     Text("\(pred.letter) (\(pred.confidence)%)")
                                         .font(.system(.caption, design: .rounded).weight(index == 0 ? .semibold : .regular))
                                         .foregroundStyle(AppTheme.textPrimary)
                                 }
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("Rank \(index + 1): \(pred.letter), \(pred.confidence) percent confidence")
                             }
                         }
                     }
@@ -141,6 +179,7 @@ struct DrawingCanvasScreen: View {
                                 .font(.system(.caption2, design: .rounded))
                                 .foregroundStyle(AppTheme.textSecondary.opacity(0.8))
                                 .lineLimit(1)
+                                .accessibilityLabel("Notice: AI predictions may make mistakes")
                         }
                     }
                 }
@@ -156,7 +195,18 @@ struct DrawingCanvasScreen: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     ThemeMenuButton()
+                        .accessibilityLabel("Appearance Settings")
                 }
+            }
+        }
+        .onChange(of: viewModel.predictions) { _, newPreds in
+            if let top = newPreds.first {
+                AccessibilityNotificationHelper.postAnnouncement("Predicted \(top.letter) with \(top.confidence) percent confidence")
+            }
+        }
+        .onChange(of: viewModel.errorMessage) { _, error in
+            if let error = error {
+                AccessibilityNotificationHelper.postAnnouncement("Error: \(error)")
             }
         }
         .alert("Clear Canvas?", isPresented: $showingClearAlert) {

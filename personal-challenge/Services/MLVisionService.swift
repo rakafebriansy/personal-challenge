@@ -33,6 +33,26 @@ private extension UIImage.Orientation {
     }
 }
 
+enum MLVisionError: LocalizedError {
+    case modelNotReady
+    case modelLoadFailed(String)
+    case imageProcessingFailed
+    case classificationFailed(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .modelNotReady:
+            return "Visual AI model is not ready. Please try again."
+        case .modelLoadFailed(let details):
+            return "Failed to load handwriting model: \(details)"
+        case .imageProcessingFailed:
+            return "Unable to process the image for analysis."
+        case .classificationFailed(let details):
+            return "Image classification failed: \(details)"
+        }
+    }
+}
+
 class MLVisionService {
     private let hijaiyahMapping: [String: String] = [
         "1": "Alif (أ)", "2": "Ba (ب)", "3": "Ta (ت)", "4": "Tsa (ث)", "5": "Jim (ج)",
@@ -44,6 +64,8 @@ class MLVisionService {
     ]
     
     private var visionModel: VNCoreMLModel?
+    private(set) var isModelReady: Bool = false
+    private(set) var setupError: Error? = nil
     
     init() {
         setupModel()
@@ -54,9 +76,13 @@ class MLVisionService {
             let config = MLModelConfiguration()
             let coreMLModel = try ArabicHandwrittenClassifier_2(configuration: config).model
             visionModel = try VNCoreMLModel(for: coreMLModel)
-            print("Load model successfully!")
+            isModelReady = true
+            setupError = nil
+            print("[MLVisionService] Arabic handwritten model loaded successfully!")
         } catch {
-            print("Fail to load model: \(error.localizedDescription)")
+            setupError = error
+            isModelReady = false
+            print("[MLVisionService] Failed to load model: \(error.localizedDescription)")
         }
     }
     
@@ -80,26 +106,27 @@ class MLVisionService {
     
     func classifyImage(image: UIImage, completion: @escaping ([Prediction], String?, UIImage?) -> Void) {
         guard let model = visionModel else {
-            completion([], "Error: model is not ready yet.", nil)
+            let errorMsg = setupError?.localizedDescription ?? MLVisionError.modelNotReady.localizedDescription
+            completion([], errorMsg, nil)
             return
         }
         
         let opaqueImage = flattenTransparentBackground(image)
         
         guard let cgImage = opaqueImage.cgImage else {
-            completion([], "Failed to read CGImage.", nil)
+            completion([], MLVisionError.imageProcessingFailed.localizedDescription, nil)
             return
         }
         
         let rawCIImage = CIImage(cgImage: cgImage)
         let orientedCIImage = rawCIImage.oriented(opaqueImage.imageOrientation.cgImagePropertyOrientation)
         guard let orientedCGImage = ciContext.createCGImage(orientedCIImage, from: orientedCIImage.extent) else {
-            completion([], "Failed to process image orientation.", nil)
+            completion([], MLVisionError.imageProcessingFailed.localizedDescription, nil)
             return
         }
         
         guard let binarizedCGImage = binarizeForClassifier(cgImage: orientedCGImage, targetSize: 360) else {
-            completion([], "Failed to binarize image.", nil)
+            completion([], MLVisionError.imageProcessingFailed.localizedDescription, nil)
             return
         }
         
@@ -107,10 +134,10 @@ class MLVisionService {
         
         let request = VNCoreMLRequest(model: model) { request, error in
             if let error = error {
-                completion([], "Error: \(error.localizedDescription)", debugImage)
+                completion([], MLVisionError.classificationFailed(error.localizedDescription).localizedDescription, debugImage)
                 return
             }
-            if let results = request.results as? [VNClassificationObservation] {
+            if let results = request.results as? [VNClassificationObservation], !results.isEmpty {
                 let top3 = results.prefix(3)
                 var predictions: [Prediction] = []
                 for result in top3 {
@@ -120,7 +147,7 @@ class MLVisionService {
                 }
                 completion(predictions, nil, debugImage)
             } else {
-                completion([], "Letter is not recognized.", debugImage)
+                completion([], "Letter not recognized. Try drawing more clearly.", debugImage)
             }
         }
         request.imageCropAndScaleOption = .scaleFill
@@ -130,7 +157,7 @@ class MLVisionService {
             do {
                 try handler.perform([request])
             } catch {
-                completion([], "Failed to perform request: \(error.localizedDescription)", debugImage)
+                completion([], MLVisionError.classificationFailed(error.localizedDescription).localizedDescription, debugImage)
             }
         }
     }

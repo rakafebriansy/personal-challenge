@@ -23,6 +23,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Canvas", systemImage: "pencil.and.scribble")
                 }
+                .accessibilityLabel("Canvas tab")
                 .tag(AppTab.canvas)
 
             if permissionManager.isCameraAuthorized {
@@ -30,6 +31,7 @@ struct ContentView: View {
                     .tabItem {
                         Label("Scanner", systemImage: "camera.viewfinder")
                     }
+                    .accessibilityLabel("Scanner tab")
                     .tag(AppTab.scanner)
             }
             
@@ -38,6 +40,7 @@ struct ContentView: View {
                     .tabItem {
                         Label("Voice", systemImage: "mic.fill")
                     }
+                    .accessibilityLabel("Voice tab")
                     .tag(AppTab.voice)
             }
             
@@ -45,6 +48,7 @@ struct ContentView: View {
                 .tabItem {
                     Label("Challenge", systemImage: "trophy.fill")
                 }
+                .accessibilityLabel("Challenge tab")
                 .tag(AppTab.challenge)
         }
         .overlay(alignment: .bottom) {
@@ -55,6 +59,7 @@ struct ContentView: View {
                     .contentShape(Rectangle())
                     .onTapGesture { }
                     .ignoresSafeArea(.all, edges: .bottom)
+                    .accessibilityHidden(true)
             }
         }
         .preferredColorScheme(themeMode.colorScheme)

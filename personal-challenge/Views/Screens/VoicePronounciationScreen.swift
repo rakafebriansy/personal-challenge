@@ -11,6 +11,7 @@ struct VoicePronunciationScreen: View {
     @State private var viewModel = VoiceViewModel()
     @State private var selectedIndex: Int = 0
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     private let letters = HijaiyahLetter.allCases
     
@@ -44,12 +45,30 @@ struct VoicePronunciationScreen: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     ThemeMenuButton()
                         .disabled(isActionDisabled)
+                        .accessibilityLabel("Appearance Settings")
                 }
             }
         }
         .onChange(of: viewModel.voiceState) { _, newState in
             let isBusy = (newState == .countdown || newState == .recording || newState == .processing)
             AppRouter.shared.isTabBarDisabled = isBusy
+            
+            switch newState {
+            case .countdown:
+                AccessibilityNotificationHelper.postAnnouncement("Get ready to pronounce \(currentLetter.displayName)")
+            case .recording:
+                AccessibilityNotificationHelper.postAnnouncement("Recording active. Pronounce \(currentLetter.displayName) now.")
+            case .processing:
+                AccessibilityNotificationHelper.postAnnouncement("Analyzing your pronunciation.")
+            case .correct:
+                AccessibilityNotificationHelper.postAnnouncement("Correct! Pronunciation matched \(currentLetter.displayName).")
+            case .incorrect:
+                AccessibilityNotificationHelper.postAnnouncement("Sound mismatch. Detected \(viewModel.detectedDisplayName). Try again.")
+            case .error(let msg):
+                AccessibilityNotificationHelper.postAnnouncement("Error: \(msg)")
+            default:
+                break
+            }
         }
         .onAppear {
             let isBusy = (viewModel.voiceState == .countdown || viewModel.voiceState == .recording || viewModel.voiceState == .processing)
@@ -65,7 +84,7 @@ struct VoicePronunciationScreen: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 7), spacing: 5) {
             ForEach(Array(letters.enumerated()), id: \.offset) { index, letter in
                 Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
                         selectedIndex = index
                         viewModel.reset()
                     }
@@ -91,6 +110,10 @@ struct VoicePronunciationScreen: View {
                     )
                 }
                 .disabled(isActionDisabled)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(letter.rawValue.capitalized), Arabic letter \(letter.arabic)")
+                .accessibilityHint(selectedIndex == index ? "Currently selected" : "Double tap to practice this letter")
+                .accessibilityAddTraits(selectedIndex == index ? [.isButton, .isSelected] : .isButton)
             }
         }
         .opacity(isActionDisabled ? 0.6 : 1.0)
@@ -103,7 +126,7 @@ struct VoicePronunciationScreen: View {
             HStack {
                 Button(action: {
                     if selectedIndex > 0 {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
                             selectedIndex -= 1
                             viewModel.reset()
                         }
@@ -114,6 +137,8 @@ struct VoicePronunciationScreen: View {
                         .foregroundStyle(selectedIndex > 0 && !isActionDisabled ? AppTheme.accentColor : Color.gray.opacity(0.3))
                 }
                 .disabled(selectedIndex == 0 || isActionDisabled)
+                .accessibilityLabel("Previous letter")
+                .accessibilityHint("Double tap to switch to previous Hijaiyah letter")
                 
                 Spacer()
                 
@@ -126,12 +151,14 @@ struct VoicePronunciationScreen: View {
                         .font(.system(.caption, design: .rounded).weight(.semibold))
                         .foregroundStyle(AppTheme.textSecondary)
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Current letter: \(currentLetter.rawValue.capitalized), Arabic \(currentLetter.arabic)")
                 
                 Spacer()
                 
                 Button(action: {
                     if selectedIndex < letters.count - 1 {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        withAnimation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.7)) {
                             selectedIndex += 1
                             viewModel.reset()
                         }
@@ -142,6 +169,8 @@ struct VoicePronunciationScreen: View {
                         .foregroundStyle(selectedIndex < letters.count - 1 && !isActionDisabled ? AppTheme.accentColor : Color.gray.opacity(0.3))
                 }
                 .disabled(selectedIndex >= letters.count - 1 || isActionDisabled)
+                .accessibilityLabel("Next letter")
+                .accessibilityHint("Double tap to switch to next Hijaiyah letter")
             }
             .padding(.horizontal, 4)
             
@@ -150,6 +179,7 @@ struct VoicePronunciationScreen: View {
             
             visualizerView
                 .frame(height: 70)
+                .accessibilityElement(children: .combine)
         }
         .allowsHitTesting(!isActionDisabled)
         .cardStyle()
@@ -181,6 +211,32 @@ struct VoicePronunciationScreen: View {
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         }
         .disabled(isActionDisabled)
+        .accessibilityLabel(actionButtonAccessibilityLabel)
+        .accessibilityHint(actionButtonAccessibilityHint)
+    }
+    
+    private var actionButtonAccessibilityLabel: String {
+        switch viewModel.voiceState {
+        case .idle:
+            return "Start Recording for \(currentLetter.displayName)"
+        case .countdown:
+            return "Get ready, starting in \(viewModel.countdownValue) seconds"
+        case .recording:
+            return "Recording audio in progress"
+        case .processing:
+            return "Analyzing pronunciation in progress"
+        case .correct, .incorrect, .error:
+            return "Record Again for \(currentLetter.displayName)"
+        }
+    }
+    
+    private var actionButtonAccessibilityHint: String {
+        switch viewModel.voiceState {
+        case .idle, .correct, .incorrect, .error:
+            return "Double tap to start recording pronunciation"
+        default:
+            return "Recording is currently active"
+        }
     }
     
     private var instructionsCard: some View {

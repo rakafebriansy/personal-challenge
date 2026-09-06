@@ -46,7 +46,7 @@ private actor LLMEngine {
         
         guard let loadedModel = llama_model_load_from_file(path, modelParams) else {
             print("[LLMService] Failed to load model from path: \(path)")
-            return
+            throw LLMError.modelLoadFailed(path)
         }
         
         var ctxParams = llama_context_default_params()
@@ -55,9 +55,8 @@ private actor LLMEngine {
         
         guard let loadedContext = llama_init_from_model(loadedModel, ctxParams) else {
             print("[LLMService] Failed to initialize llama context.")
-            
             llama_model_free(loadedModel)
-            return
+            throw LLMError.contextInitFailed
         }
         
         model = loadedModel
@@ -183,12 +182,19 @@ final class LLMService {
     
     private(set) var isModelLoaded: Bool = false
     private(set) var isGenerating: Bool = false
+    private(set) var loadingError: Error? = nil
     
     private let engine = LLMEngine()
     
     init() {
         Task {
-            try? await loadModel()
+            do {
+                try await loadModel()
+            } catch {
+                await MainActor.run {
+                    self.loadingError = error
+                }
+            }
         }
     }
     
@@ -208,12 +214,20 @@ final class LLMService {
                               Bundle.main.path(forResource: "qwen2.5-0.5b-instruct-q4_k_m", ofType: "gguf", inDirectory: "Resources") ??
                               Bundle.main.url(forResource: "qwen2.5-0.5b-instruct-q4_k_m", withExtension: "gguf")?.path else {
             print("[LLMService] File qwen2.5-0.5b-instruct-q4_k_m.gguf not found in App Bundle.")
-            throw LLMError.modelNotFound("qwen2.5-0.5b-instruct-q4_k_m.gguf")
+            let err = LLMError.modelNotFound("qwen2.5-0.5b-instruct-q4_k_m.gguf")
+            self.loadingError = err
+            throw err
         }
         
-        try await engine.loadModel(path: modelPath)
-        isModelLoaded = true
-        print("[LLMService] Qwen2.5-0.5B on-device successfully loaded into memory!")
+        do {
+            try await engine.loadModel(path: modelPath)
+            isModelLoaded = true
+            loadingError = nil
+            print("[LLMService] Qwen2.5-0.5B on-device successfully loaded into memory!")
+        } catch {
+            self.loadingError = error
+            throw error
+        }
     }
     
     func generateStreaming(prompt: String) -> AsyncThrowingStream<String, Error> {

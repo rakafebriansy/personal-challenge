@@ -13,15 +13,21 @@ class CanvasViewModel {
     var lines: [Line] = []
     
     var statusMessage: String = "Draw a Hijaiyah letter on the canvas above, then tap 'Check Drawing'."
+    var errorMessage: String? = nil
     var predictions: [Prediction] = []
     var isProcessing: Bool = false
     var debugProcessedImage: UIImage? = nil
     
     private let mlService = MLVisionService()
     
+    var isModelReady: Bool {
+        mlService.isModelReady
+    }
+    
     func clear() {
         lines = []
         statusMessage = "Draw a Hijaiyah letter on the canvas above, then tap 'Check Drawing'."
+        errorMessage = nil
         predictions = []
         debugProcessedImage = nil
     }
@@ -30,19 +36,21 @@ class CanvasViewModel {
         guard !lines.isEmpty else { return }
         lines.removeLast()
         statusMessage = "Draw a Hijaiyah letter on the canvas above, then tap 'Check Drawing'."
+        errorMessage = nil
         predictions = []
         debugProcessedImage = nil
     }
     
     func checkDrawing(canvasSize: CGSize) {
         guard !lines.isEmpty else {
-            statusMessage = "Canvas is empty! Draw a letter first."
+            errorMessage = "Canvas is empty! Draw a letter first."
             predictions = []
             return
         }
         
         isProcessing = true
         statusMessage = "Analyzing drawing..."
+        errorMessage = nil
         predictions = []
         
         let image = renderCanvasToImage(size: canvasSize)
@@ -52,7 +60,13 @@ class CanvasViewModel {
             Task {
                 @MainActor in
                 self?.predictions = preds
-                self?.statusMessage = errorMsg ?? ""
+                if let errorMsg = errorMsg, preds.isEmpty {
+                    self?.errorMessage = errorMsg
+                    self?.statusMessage = ""
+                } else {
+                    self?.errorMessage = nil
+                    self?.statusMessage = preds.isEmpty ? (errorMsg ?? "No letter detected") : ""
+                }
                 self?.debugProcessedImage = debugImage
                 self?.isProcessing = false
             }
