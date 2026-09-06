@@ -1,13 +1,13 @@
 //
-//  personal_challengeUITests.swift
-//  personal-challengeUITests
+//  hijaiappUITests.swift
+//  hijaiappUITests
 //
 //  Created by Raka Febrian Syahputra on 20/08/26.
 //
 
 import XCTest
 
-final class personal_challengeUITests: XCTestCase {
+final class hijaiappUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

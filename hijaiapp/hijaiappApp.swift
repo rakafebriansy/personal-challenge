@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct personal_challengeApp: App {
+struct hijaiappApp: App {
     let container: ModelContainer?
     let initError: Error?
     
@@ -18,7 +18,7 @@ struct personal_challengeApp: App {
             self.container = try ModelContainer(for: ChallengeHistory.self)
             self.initError = nil
         } catch {
-            print("[personal_challengeApp] Failed to create persistent ModelContainer: \(error.localizedDescription)")
+            print("[hijaiappApp] Failed to create persistent ModelContainer: \(error.localizedDescription)")
             do {
                 let schema = Schema([ChallengeHistory.self])
                 let config = ModelConfiguration(isStoredInMemoryOnly: true)

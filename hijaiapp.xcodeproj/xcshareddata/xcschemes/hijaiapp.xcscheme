@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "960CBACB30368FC900FA4955"
-               BuildableName = "personal-challenge.app"
-               BlueprintName = "personal-challenge"
-               ReferencedContainer = "container:personal-challenge.xcodeproj">
+               BuildableName = "hijaiapp.app"
+               BlueprintName = "hijaiapp"
+               ReferencedContainer = "container:hijaiapp.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "960CBADA30368FC900FA4955"
-               BuildableName = "personal-challengeTests.xctest"
-               BlueprintName = "personal-challengeTests"
-               ReferencedContainer = "container:personal-challenge.xcodeproj">
+               BuildableName = "hijaiappTests.xctest"
+               BlueprintName = "hijaiappTests"
+               ReferencedContainer = "container:hijaiapp.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "960CBAE430368FC900FA4955"
-               BuildableName = "personal-challengeUITests.xctest"
-               BlueprintName = "personal-challengeUITests"
-               ReferencedContainer = "container:personal-challenge.xcodeproj">
+               BuildableName = "hijaiappUITests.xctest"
+               BlueprintName = "hijaiappUITests"
+               ReferencedContainer = "container:hijaiapp.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "960CBACB30368FC900FA4955"
-            BuildableName = "personal-challenge.app"
-            BlueprintName = "personal-challenge"
-            ReferencedContainer = "container:personal-challenge.xcodeproj">
+            BuildableName = "hijaiapp.app"
+            BlueprintName = "hijaiapp"
+            ReferencedContainer = "container:hijaiapp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -87,9 +87,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "960CBACB30368FC900FA4955"
-            BuildableName = "personal-challenge.app"
-            BlueprintName = "personal-challenge"
-            ReferencedContainer = "container:personal-challenge.xcodeproj">
+            BuildableName = "hijaiapp.app"
+            BlueprintName = "hijaiapp"
+            ReferencedContainer = "container:hijaiapp.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

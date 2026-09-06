@@ -1,13 +1,13 @@
 //
-//  personal_challengeUITestsLaunchTests.swift
-//  personal-challengeUITests
+//  hijaiappUITestsLaunchTests.swift
+//  hijaiappUITests
 //
 //  Created by Raka Febrian Syahputra on 20/08/26.
 //
 
 import XCTest
 
-final class personal_challengeUITestsLaunchTests: XCTestCase {
+final class hijaiappUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

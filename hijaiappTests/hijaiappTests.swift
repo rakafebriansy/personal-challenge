@@ -1,14 +1,14 @@
 //
-//  personal_challengeTests.swift
-//  personal-challengeTests
+//  hijaiappTests.swift
+//  hijaiappTests
 //
 //  Created by Raka Febrian Syahputra on 20/08/26.
 //
 
 import Testing
-@testable import personal_challenge
+@testable import hijaiapp
 
-struct personal_challengeTests {
+struct hijaiappTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

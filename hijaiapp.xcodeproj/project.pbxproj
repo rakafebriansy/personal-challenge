@@ -16,50 +16,50 @@
 			containerPortal = 960CBAC430368FC900FA4955 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 960CBACB30368FC900FA4955;
-			remoteInfo = "personal-challenge";
+			remoteInfo = "hijaiapp";
 		};
 		960CBAE630368FC900FA4955 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 960CBAC430368FC900FA4955 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 960CBACB30368FC900FA4955;
-			remoteInfo = "personal-challenge";
+			remoteInfo = "hijaiapp";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		960CBACC30368FC900FA4955 /* personal-challenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "personal-challenge.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		960CBADB30368FC900FA4955 /* personal-challengeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "personal-challengeTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		960CBAE530368FC900FA4955 /* personal-challengeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "personal-challengeUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		960CBACC30368FC900FA4955 /* hijaiapp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hijaiapp.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		960CBADB30368FC900FA4955 /* hijaiappTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "hijaiappTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		960CBAE530368FC900FA4955 /* hijaiappUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "hijaiappUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		39C8BBE4303E7F28006A1D98 /* Exceptions for "personal-challenge" folder in "personal-challenge" target */ = {
+		39C8BBE4303E7F28006A1D98 /* Exceptions for "hijaiapp" folder in "hijaiapp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 960CBACB30368FC900FA4955 /* personal-challenge */;
+			target = 960CBACB30368FC900FA4955 /* hijaiapp */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		960CBACE30368FC900FA4955 /* personal-challenge */ = {
+		960CBACE30368FC900FA4955 /* hijaiapp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				39C8BBE4303E7F28006A1D98 /* Exceptions for "personal-challenge" folder in "personal-challenge" target */,
+				39C8BBE4303E7F28006A1D98 /* Exceptions for "hijaiapp" folder in "hijaiapp" target */,
 			);
-			path = "personal-challenge";
+			path = "hijaiapp";
 			sourceTree = "<group>";
 		};
-		960CBADE30368FC900FA4955 /* personal-challengeTests */ = {
+		960CBADE30368FC900FA4955 /* hijaiappTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "personal-challengeTests";
+			path = "hijaiappTests";
 			sourceTree = "<group>";
 		};
-		960CBAE830368FC900FA4955 /* personal-challengeUITests */ = {
+		960CBAE830368FC900FA4955 /* hijaiappUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "personal-challengeUITests";
+			path = "hijaiappUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -100,9 +100,9 @@
 		960CBAC330368FC900FA4955 = {
 			isa = PBXGroup;
 			children = (
-				960CBACE30368FC900FA4955 /* personal-challenge */,
-				960CBADE30368FC900FA4955 /* personal-challengeTests */,
-				960CBAE830368FC900FA4955 /* personal-challengeUITests */,
+				960CBACE30368FC900FA4955 /* hijaiapp */,
+				960CBADE30368FC900FA4955 /* hijaiappTests */,
+				960CBAE830368FC900FA4955 /* hijaiappUITests */,
 				39507162304B9AA2006E1E9F /* Frameworks */,
 				960CBACD30368FC900FA4955 /* Products */,
 			);
@@ -111,9 +111,9 @@
 		960CBACD30368FC900FA4955 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				960CBACC30368FC900FA4955 /* personal-challenge.app */,
-				960CBADB30368FC900FA4955 /* personal-challengeTests.xctest */,
-				960CBAE530368FC900FA4955 /* personal-challengeUITests.xctest */,
+				960CBACC30368FC900FA4955 /* hijaiapp.app */,
+				960CBADB30368FC900FA4955 /* hijaiappTests.xctest */,
+				960CBAE530368FC900FA4955 /* hijaiappUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,9 +121,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		960CBACB30368FC900FA4955 /* personal-challenge */ = {
+		960CBACB30368FC900FA4955 /* hijaiapp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 960CBAEF30368FC900FA4955 /* Build configuration list for PBXNativeTarget "personal-challenge" */;
+			buildConfigurationList = 960CBAEF30368FC900FA4955 /* Build configuration list for PBXNativeTarget "hijaiapp" */;
 			buildPhases = (
 				960CBAC830368FC900FA4955 /* Sources */,
 				960CBAC930368FC900FA4955 /* Frameworks */,
@@ -134,19 +134,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				960CBACE30368FC900FA4955 /* personal-challenge */,
+				960CBACE30368FC900FA4955 /* hijaiapp */,
 			);
-			name = "personal-challenge";
+			name = "hijaiapp";
 			packageProductDependencies = (
 				39507163304B9AA2006E1E9F /* LlamaSwift */,
 			);
-			productName = "personal-challenge";
-			productReference = 960CBACC30368FC900FA4955 /* personal-challenge.app */;
+			productName = "hijaiapp";
+			productReference = 960CBACC30368FC900FA4955 /* hijaiapp.app */;
 			productType = "com.apple.product-type.application";
 		};
-		960CBADA30368FC900FA4955 /* personal-challengeTests */ = {
+		960CBADA30368FC900FA4955 /* hijaiappTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 960CBAF230368FC900FA4955 /* Build configuration list for PBXNativeTarget "personal-challengeTests" */;
+			buildConfigurationList = 960CBAF230368FC900FA4955 /* Build configuration list for PBXNativeTarget "hijaiappTests" */;
 			buildPhases = (
 				960CBAD730368FC900FA4955 /* Sources */,
 				960CBAD830368FC900FA4955 /* Frameworks */,
@@ -158,18 +158,18 @@
 				960CBADD30368FC900FA4955 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				960CBADE30368FC900FA4955 /* personal-challengeTests */,
+				960CBADE30368FC900FA4955 /* hijaiappTests */,
 			);
-			name = "personal-challengeTests";
+			name = "hijaiappTests";
 			packageProductDependencies = (
 			);
-			productName = "personal-challengeTests";
-			productReference = 960CBADB30368FC900FA4955 /* personal-challengeTests.xctest */;
+			productName = "hijaiappTests";
+			productReference = 960CBADB30368FC900FA4955 /* hijaiappTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		960CBAE430368FC900FA4955 /* personal-challengeUITests */ = {
+		960CBAE430368FC900FA4955 /* hijaiappUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 960CBAF530368FC900FA4955 /* Build configuration list for PBXNativeTarget "personal-challengeUITests" */;
+			buildConfigurationList = 960CBAF530368FC900FA4955 /* Build configuration list for PBXNativeTarget "hijaiappUITests" */;
 			buildPhases = (
 				960CBAE130368FC900FA4955 /* Sources */,
 				960CBAE230368FC900FA4955 /* Frameworks */,
@@ -181,13 +181,13 @@
 				960CBAE730368FC900FA4955 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				960CBAE830368FC900FA4955 /* personal-challengeUITests */,
+				960CBAE830368FC900FA4955 /* hijaiappUITests */,
 			);
-			name = "personal-challengeUITests";
+			name = "hijaiappUITests";
 			packageProductDependencies = (
 			);
-			productName = "personal-challengeUITests";
-			productReference = 960CBAE530368FC900FA4955 /* personal-challengeUITests.xctest */;
+			productName = "hijaiappUITests";
+			productReference = 960CBAE530368FC900FA4955 /* hijaiappUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -213,7 +213,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 960CBAC730368FC900FA4955 /* Build configuration list for PBXProject "personal-challenge" */;
+			buildConfigurationList = 960CBAC730368FC900FA4955 /* Build configuration list for PBXProject "hijaiapp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -230,9 +230,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				960CBACB30368FC900FA4955 /* personal-challenge */,
-				960CBADA30368FC900FA4955 /* personal-challengeTests */,
-				960CBAE430368FC900FA4955 /* personal-challengeUITests */,
+				960CBACB30368FC900FA4955 /* hijaiapp */,
+				960CBADA30368FC900FA4955 /* hijaiappTests */,
+				960CBAE430368FC900FA4955 /* hijaiappUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -288,12 +288,12 @@
 /* Begin PBXTargetDependency section */
 		960CBADD30368FC900FA4955 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 960CBACB30368FC900FA4955 /* personal-challenge */;
+			target = 960CBACB30368FC900FA4955 /* hijaiapp */;
 			targetProxy = 960CBADC30368FC900FA4955 /* PBXContainerItemProxy */;
 		};
 		960CBAE730368FC900FA4955 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 960CBACB30368FC900FA4955 /* personal-challenge */;
+			target = 960CBACB30368FC900FA4955 /* hijaiapp */;
 			targetProxy = 960CBAE630368FC900FA4955 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -430,7 +430,8 @@
 				DEVELOPMENT_TEAM = URFUZSHWW9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "personal-challenge/Info.plist";
+				INFOPLIST_FILE = "hijaiapp/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = hijaiapp;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk menerjemahkan tulisan tangan Hijaiyah secara langsung.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Aplikasi memerlukan akses mikrofon untuk mengevaluasi pelafalan huruf Hijaiyah Anda.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -443,7 +444,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "rakafebriansy.personal-challenge";
+				PRODUCT_BUNDLE_IDENTIFIER = rakafebriansy.hijaiapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -465,7 +466,8 @@
 				DEVELOPMENT_TEAM = URFUZSHWW9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "personal-challenge/Info.plist";
+				INFOPLIST_FILE = "hijaiapp/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = hijaiapp;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk menerjemahkan tulisan tangan Hijaiyah secara langsung.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Aplikasi memerlukan akses mikrofon untuk mengevaluasi pelafalan huruf Hijaiyah Anda.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -478,7 +480,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "rakafebriansy.personal-challenge";
+				PRODUCT_BUNDLE_IDENTIFIER = rakafebriansy.hijaiapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -500,7 +502,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "rakafebriansy.personal-challengeTests";
+				PRODUCT_BUNDLE_IDENTIFIER = rakafebriansy.hijaiappTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -508,7 +510,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/personal-challenge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/personal-challenge";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hijaiapp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hijaiapp";
 			};
 			name = Debug;
 		};
@@ -522,7 +524,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "rakafebriansy.personal-challengeTests";
+				PRODUCT_BUNDLE_IDENTIFIER = rakafebriansy.hijaiappTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -530,7 +532,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/personal-challenge.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/personal-challenge";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hijaiapp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hijaiapp";
 			};
 			name = Release;
 		};
@@ -542,7 +544,7 @@
 				DEVELOPMENT_TEAM = URFUZSHWW9;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "rakafebriansy.personal-challengeUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = rakafebriansy.hijaiappUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -550,7 +552,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "personal-challenge";
+				TEST_TARGET_NAME = "hijaiapp";
 			};
 			name = Debug;
 		};
@@ -562,7 +564,7 @@
 				DEVELOPMENT_TEAM = URFUZSHWW9;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "rakafebriansy.personal-challengeUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = rakafebriansy.hijaiappUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -570,14 +572,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "personal-challenge";
+				TEST_TARGET_NAME = "hijaiapp";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		960CBAC730368FC900FA4955 /* Build configuration list for PBXProject "personal-challenge" */ = {
+		960CBAC730368FC900FA4955 /* Build configuration list for PBXProject "hijaiapp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				960CBAED30368FC900FA4955 /* Debug */,
@@ -586,7 +588,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		960CBAEF30368FC900FA4955 /* Build configuration list for PBXNativeTarget "personal-challenge" */ = {
+		960CBAEF30368FC900FA4955 /* Build configuration list for PBXNativeTarget "hijaiapp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				960CBAF030368FC900FA4955 /* Debug */,
@@ -595,7 +597,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		960CBAF230368FC900FA4955 /* Build configuration list for PBXNativeTarget "personal-challengeTests" */ = {
+		960CBAF230368FC900FA4955 /* Build configuration list for PBXNativeTarget "hijaiappTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				960CBAF330368FC900FA4955 /* Debug */,
@@ -604,7 +606,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		960CBAF530368FC900FA4955 /* Build configuration list for PBXNativeTarget "personal-challengeUITests" */ = {
+		960CBAF530368FC900FA4955 /* Build configuration list for PBXNativeTarget "hijaiappUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				960CBAF630368FC900FA4955 /* Debug */,
