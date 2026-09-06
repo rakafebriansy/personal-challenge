@@ -1,6 +1,6 @@
 //
 //  DesignSystem.swift
-//  personal-challenge
+//  hijaiapp
 //
 
 import SwiftUI

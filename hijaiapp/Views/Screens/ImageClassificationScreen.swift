@@ -1,6 +1,6 @@
 //
 //  ImageClassificationScreen.swift
-//  personal-challenge
+//  hijaiapp
 //
 //  Created by Raka Febrian Syahputra on 27/08/26.
 //

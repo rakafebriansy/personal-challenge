@@ -1,6 +1,6 @@
 //
 //  LLMService.swift
-//  personal-challenge
+//  hijaiapp
 //
 //  Created by Raka Febrian Syahputra on 05/09/26.
 //

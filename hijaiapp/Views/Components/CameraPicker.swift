@@ -1,6 +1,6 @@
 //
 //  CameraPicker.swift
-//  personal-challenge
+//  hijaiapp
 //
 //  Created by Raka Febrian Syahputra on 24/08/26.
 //

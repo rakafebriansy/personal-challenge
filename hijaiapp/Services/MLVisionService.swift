@@ -1,6 +1,6 @@
 //
 //  MLVisionService.swift
-//  personal-challenge
+//  hijaiapp
 //
 //  Created by Raka Febrian Syahputra on 20/08/26.
 //

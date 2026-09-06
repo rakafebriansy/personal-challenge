@@ -1,6 +1,6 @@
 //
-//  personal_challengeApp.swift
-//  personal-challenge
+//  hijaiappApp.swift
+//  hijaiapp
 //
 //  Created by Raka Febrian Syahputra on 20/08/26.
 //
