@@ -431,7 +431,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "hijaiapp/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = hijaiapp;
+				INFOPLIST_KEY_CFBundleDisplayName = Hijaiapp;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk menerjemahkan tulisan tangan Hijaiyah secara langsung.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Aplikasi memerlukan akses mikrofon untuk mengevaluasi pelafalan huruf Hijaiyah Anda.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -467,7 +467,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "hijaiapp/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = hijaiapp;
+				INFOPLIST_KEY_CFBundleDisplayName = Hijaiapp;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk menerjemahkan tulisan tangan Hijaiyah secara langsung.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Aplikasi memerlukan akses mikrofon untuk mengevaluasi pelafalan huruf Hijaiyah Anda.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
