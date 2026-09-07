@@ -10,7 +10,7 @@ import SwiftData
 
 struct CheckGameStatsIntent: AppIntent {
     static var title: LocalizedStringResource = "Check Game Statistics"
-    static var description = IntentDescription("Ask Siri for your challenge game statistics including total games played, best score, and lowest score.")
+    static var description = IntentDescription("Check your challenge game statistics including total games played, best score, and lowest score.")
     
     static var openAppWhenRun: Bool = false
     
